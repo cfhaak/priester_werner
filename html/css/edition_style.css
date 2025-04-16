@@ -1,0 +1,212 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+div {
+    box-sizing: border-box;
+}
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+.controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+/* #witness-scroller { */
+    /* overflow-x: auto; */
+    /* padding: 1rem; */
+    /* overflow-x: auto; */
+    /* width: 100%; */
+    /* height: 100%; */
+/* } */
+
+/* #witness-scoller.individual-scroll-vertical {
+    overflow-y: hidden!important;
+}
+
+#witness-scroller.global-scroll-vertical {
+    overflow-y: hidden!important;
+} */
+
+#witness-container {
+    display: inline-flex; /* Use inline-flex to fit the width of children */
+    flex-direction: row; /* Arrange children in a row */
+    flex-wrap: nowrap; /* Prevent wrapping */
+    gap: 0.75rem; /* Add spacing between children */
+    padding-bottom: 1rem;
+    align-items: stretch;
+    white-space: nowrap; /* Prevent children from wrapping */
+    width: auto; /* Ensure the width adjusts to fit children */
+    height: 100%;
+    /* width: 100%; */
+    overflow-x: auto;
+    overflow-y: auto;
+    height: 100%!
+}
+
+.witness {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: fit-content;
+    width: fit-content;
+    max-width: fit-content;
+    font-size: 1em;
+    text-align: left;
+    font-family: Garamond, serif;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 1rem;
+}
+
+.witness.individual-scroll-vertical {
+    height: 100%;
+}
+
+.witness.global-scroll-vertical {
+    height: fit-content;
+}
+
+.controls-container {
+    height: 2.5rem;
+}
+
+.text-content.individual-scroll-vertical {
+    overflow-y: auto;
+    height: calc(100% - 2rem);
+}
+
+.text-content.global-scroll-vertical {
+    height: fit-content;
+}
+
+#columnControls {
+    margin: 20px 0;
+    display: flex;
+    gap: 0;
+}
+
+.controlls-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next row */
+    justify-content: space-between; /* Space between dropdown and button */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 10px;
+    position: sticky; /* Make it sticky */
+    top: 0; /* Stick to the top */
+    z-index: 20; /* Ensure it stays above other elements */
+    padding-top: .5rem;}
+
+.controlls-container .remove-column-button {
+    margin-left: auto; /* Push the button to the right */
+}
+
+.col_sw {
+    padding: 5px 20px 5px 10px;
+    font-size: 14px;
+}
+
+.column-button {
+    padding: 5px 20px 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid #999;
+    border-radius: 3px;
+    margin: 0;
+    /*flex: 1;*/
+    text-align: center;
+    width: 10px;
+}
+
+.init {
+    color: red;
+    font-size: 120%;
+}
+
+span.witness-line:hover {
+    background-color: lightblue;
+}
+
+.linenr-global {
+    font-size: 0.8em;
+    color: gray;
+}
+
+.linenr_own {
+    font-size: 0.8em;
+    color: gray;
+}
+
+span.highlight {
+    background-color: yellow;
+    transition: background-color 0.3s ease;
+}
+span.highlight.neigh {
+    background-color: inherit;
+    border-bottom: yellow solid 4px;
+    margin-bottom: 1rem
+    transition: border-bottom 0.3s ease;
+    width: 100%;
+    display: inline-block;
+}
+
+.lb {
+    color: red;
+}
+
+.rub {
+    color: red;
+}
+
+.am {
+    display: none;
+}
+
+.lb {
+    display: none;
+}
+
+.s_orig {
+    display: none;
+}
+
+.sup_orig {
+    display: none;
+}
+
+.last .linenr-global {
+    color: orange;
+}
+
+.line-highlight {
+    background-color: rgba(255, 204, 153, 0.4);
+}
+
+button.remove-column-button {
+    position: sticky;
+    background-color: white;
+    color: grey;
+    border: none;
+    width: 1rem;
+    height: 2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 10;
+    line-height: 1rem;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
