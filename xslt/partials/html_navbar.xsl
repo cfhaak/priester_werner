@@ -30,6 +30,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="toc.html">Editionseinheiten</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="column_viewer.html">Fassungsvergleich</a>
+                            </li>
 
                             <li class="nav-item dropdown disabled">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Register</a>
@@ -46,6 +49,7 @@
                                     <li>
                                         <a class="dropdown-item" href="listbibl.html">Werke</a>
                                     </li>
+                          
                                 </ul>
                             </li>
 
