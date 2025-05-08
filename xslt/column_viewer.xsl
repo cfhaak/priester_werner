@@ -39,6 +39,8 @@
                             <xsl:value-of select="$project_title" />
                         </h2>
                     </div>
+                    <div id="witness-container"></div>
+
                 </main>
                 <xsl:call-template name="html_footer" />
             </body>

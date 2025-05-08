@@ -2,6 +2,7 @@
 <project basedir="." name="tei2html">
     <property name="index" value="./data/meta/about.xml"/>
     <property name="target" value="./html"/>
+    <property name="snippet_dir" value="./html/witness_snippets"/>
     <property name="target_xml" value="./html/xml-view"/>
     <delete>
         <fileset dir="${target}" includes="*.html"/>
@@ -14,7 +15,7 @@
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    <xslt in="${index}" out="${target}/test.json" style="./xslt/create_witness_json.xsl">
+    <xslt in="${index}" out="${snippet_dir}/snippet_paths.json" style="./xslt/create_witness_json.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
@@ -26,7 +27,10 @@
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>
     </xslt>
-    
+    <xslt style="./xslt/generate_snippets.xsl"  basedir="./data/editions" destdir="${snippet_dir}" includes="*.xml">
+        <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        <classpath location="${basedir}/saxon/saxon9he.jar"/>
+    </xslt>    
     <xslt style="./xslt/meta.xsl"  basedir="./data/meta" destdir="${target}" includes="*.xml">
         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         <classpath location="${basedir}/saxon/saxon9he.jar"/>

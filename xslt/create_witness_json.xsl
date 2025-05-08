@@ -6,7 +6,7 @@
     <xsl:output method="text" encoding="UTF-8" />
     <!-- see https://www.w3.org/TR/xpath-functions-31/schema-for-json.xsd -->
 <xsl:variable name="snippet_path">
-        <xsl:value-of select="" />
+        <xsl:value-of select="'./html/witness_snippets/'" />
 </xsl:variable>
 <xsl:template
         match="/">
@@ -25,7 +25,7 @@
                             </string>
                             <string key="filepath">
                                 <xsl:value-of
-                                    select="replace(tokenize(document-uri(.), '/')[last()], '\.xml$', '.html')" />
+                                    select="concat($snippet_path, replace(tokenize(document-uri(.), '/')[last()], '\.xml$', '.html'))" />
                             </string>
                             <string key="sorting">
                                 <xsl:value-of select="''" />
