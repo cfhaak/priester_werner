@@ -71,6 +71,7 @@ div {
 .text-content.individual-scroll-vertical {
     overflow-y: auto;
     height: calc(100% - 2rem);
+    padding-top: 10rem;
 }
 
 .text-content.global-scroll-vertical {
