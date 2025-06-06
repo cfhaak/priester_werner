@@ -118,13 +118,14 @@ class Witness:
 
 
 def test():
+    xpath_expr = "//tei:body/tei:div[1]/div[@type='section']"
     xfstr_1 = Witness(
-        file_path="./data/source/sfe-1901-002__1901.1.xml",
-        text_container_xpath="//tei:body/tei:div[1]",
+        file_path="./data/source/sfe-1901-002__1901.1_sections.xml",
+        text_container_xpath=xpath_expr,
     )
     xfstr_2 = Witness(
-        file_path="./data/source/sfe-1901-002__1901.2.xml",
-        text_container_xpath="//tei:body/tei:div[1]",
+        file_path="./data/source/sfe-1901-002__1901.3_sections.xml",
+        text_container_xpath=xpath_expr,
     )
     xfstr_1.result_test()
     xfstr_2.result_test()
