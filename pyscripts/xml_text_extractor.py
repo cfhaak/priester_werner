@@ -2,6 +2,7 @@
 # import json
 # import glob
 # from acdh_tei_pyutils.tei import TeiReader
+from stupid_statemachines import Tag
 from random import randrange
 from saxonche import PySaxonProcessor
 
@@ -82,17 +83,25 @@ class Witness:
         max_index = len(self.xml_string)
         tag_open = False
         prev_text_char = ""
+        prev_global_char = ""
         new_char_index = 0
-        prev_tag = ""
+        prev_tag = None
         for xml_string_index in range(0, max_index):
             char = self.xml_string[xml_string_index]
+            prev_global_char = char
             if char == "<":
+                prev_tag = Tag()
                 tag_open = True
             elif char == ">":
+                if prev_tag.name == "lb" and prev_tag.get_attribute_val("break") == "no" and prev_text_char == " ":
+                    self.char_list.pop()
+                    new_char_index -= 1
                 tag_open = False
             elif tag_open:
-                pass
+                prev_tag.append_char(char)
             elif char == " " and prev_text_char == " " and ignore_multi_whitespace:
+                pass
+            elif char == " " and prev_global_char == ">" and prev_tag.name == "lb" and prev_tag.get_attribute_val("break") == "no":
                 pass
             elif char in skip_chars:
                 pass
@@ -110,11 +119,11 @@ class Witness:
 
 def test():
     xfstr_1 = Witness(
-        file_path="./data/sources/sfe-1901-002__1901.1.xml",
+        file_path="./data/source/sfe-1901-002__1901.1.xml",
         text_container_xpath="//tei:body/tei:div[1]",
     )
     xfstr_2 = Witness(
-        file_path="./data/sources/sfe-1901-002__1901.2.xml",
+        file_path="./data/source/sfe-1901-002__1901.2.xml",
         text_container_xpath="//tei:body/tei:div[1]",
     )
     xfstr_1.result_test()

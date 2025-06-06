@@ -3,3 +3,4 @@ html/*.html
 html/*.xml
 html/test.json
 .venv
+pyscripts/__pycache__/*
