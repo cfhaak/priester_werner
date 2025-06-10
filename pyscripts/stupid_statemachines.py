@@ -1,7 +1,7 @@
 class Attribute:
-    def __init__(self, char: str = ""):
-        self.name = char
-        self.value = ""
+    def __init__(self, name: str = "", value = ""):
+        self.name = name
+        self.value = value
 
     def append_char_to_name(self, char: str):
         self.name += char
@@ -9,6 +9,8 @@ class Attribute:
     def append_char_to_value(self, char: str):
         self.value += char
 
+    def to_string(self):
+        return f'{self.name} = "{self.value}"'
 
 class Tag:
     # I know, I know
@@ -16,9 +18,9 @@ class Tag:
     # ([\w|data-]+)=[\"']?((?:.(?![\"']?\s+(?:\S+)=|\s*\/?[>\"']))+.)[\"']?
     # would have worked just fine, but state machines are fun! Especially if 
     # I created bugs, you have to fix ;) have fun!!!
-    def __init__(self):
-        self.name = ""
-        self.__attributes = []
+    def __init__(self, name: str="", attributes: list = []):
+        self.name = name
+        self.__attributes = attributes
         self.__name_closed = False
         self.__attrib_val_open = False
         self.__attrib_name_open = False
