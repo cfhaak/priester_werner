@@ -19,6 +19,7 @@ def xpath(
         for namespace, uri in namespaces.items():
             xpath_proc.declare_namespace(namespace, uri)
         result = xpath_proc.evaluate(xpath)
+        assert not (result is None), f"xpath matched nothing in {file_path}"
         return result
 
 
@@ -165,8 +166,7 @@ class Witness:
         self.text_string = "".join(self.__char_list)
 
 
-# def test():
-xpath_expr = "//tei:body/tei:div[1]"#//div[@type='section']"
+xpath_expr = "//tei:body/tei:div[1]//tei:div[@type='section']"
 xfstr_1 = Witness(
     file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
     text_container_xpath=xpath_expr,

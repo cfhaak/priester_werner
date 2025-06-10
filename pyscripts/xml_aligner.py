@@ -107,14 +107,24 @@ class XMLFileString:
                 new_char_index += 1
         self.text_string = "".join(self.char_list)
 
-def test():     
-    xfstr_1 = XMLFileString(
-        file_path="data/editions/sfe-1901-002__1901.1.xml",
-        text_container_xpath="//tei:body/tei:div[1]"
-    )
-    xfstr_2 = XMLFileString(
-        file_path="data/editions/sfe-1901-002__1901.2.xml",
-        text_container_xpath="//tei:body/tei:div[1]"
-    )
-    xfstr_1.result_test()
-    xfstr_2.result_test()
+
+xpath_expr = "//tei:body/tei:div[1]"#//div[@type='section']"
+xfstr_1 = Witness(
+    file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
+    text_container_xpath=xpath_expr,
+)
+xfstr_2 = Witness(
+    file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
+    text_container_xpath=xpath_expr,
+)
+t=Tag("span", {"type":"versuch_01"})
+start_i = xfstr_1.text_to_xml[40]
+end_i = xfstr_1.text_to_xml[150]
+print( xfstr_1.xml_string[start_i:end_i])
+print("\n\n",20*",","-\n\n")
+input(xfstr_1.text_string[44:67])
+xfstr_1.place_tag(t, 44, 54)
+input(
+    xfstr_1.xml_string[start_i:end_i]
+)
+xfstr_1.result_test()
