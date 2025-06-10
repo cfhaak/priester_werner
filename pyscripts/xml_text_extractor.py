@@ -60,12 +60,26 @@ class Witness:
         self.text_to_xml.update(changed)
             
             
-    def insert_tag(self, tag: str, insert_before_index: int, insert_closing_before_index: int|None = None):
-        self.xml_string = self.xml_string[:insert_before_index] + tag + self.xml_string[insert_before_index:]
+    def insert_tag(self, tag: Tag, insert_before_index: int, insert_closing_after_index: int|None = None):
+        opening, closing = tag.get_pseudo_markup()
+        if insert_closing_after_index is None:
+            opening += closing
+        else:
+            assert insert_before_index <= insert_closing_after_index, "The insert_closing_after_index value '{insert_closing_after_index}' is to small to tag anything."
+            xml_index = self.text_to_xml[insert_closing_after_index + 1]
+            self.xml_string = self.xml_string[:xml_index] + closing + self.xml_string[xml_index:]
+            self.update_index(
+                insert_closing_after_index + 1,
+                len(closing)
+            )
+        xml_index = self.text_to_xml[insert_before_index]
+        self.xml_string = self.xml_string[:xml_index] + opening + self.xml_string[xml_index:]
         self.update_index(
             insert_before_index,
-            offset=len(tag)
+            len(opening)
         )
+            
+            
 
     def result_test(self):
         string_len = len(self.text_string)
@@ -143,18 +157,23 @@ class Witness:
         self.text_string = "".join(self.__char_list)
 
 
-def test():
-    xpath_expr = "//tei:body/tei:div[1]"#//div[@type='section']"
-    xfstr_1 = Witness(
-        file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
-        text_container_xpath=xpath_expr,
-    )
-    xfstr_2 = Witness(
-        file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
-        text_container_xpath=xpath_expr,
-    )
-    xfstr_1.result_test()
-    xfstr_2.result_test()
-
-
-test()
+# def test():
+xpath_expr = "//tei:body/tei:div[1]"#//div[@type='section']"
+xfstr_1 = Witness(
+    file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
+    text_container_xpath=xpath_expr,
+)
+xfstr_2 = Witness(
+    file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
+    text_container_xpath=xpath_expr,
+)
+t=Tag("span", {"type":"versuch_01"})
+start_i = xfstr_1.text_to_xml[40]
+end_i = xfstr_1.text_to_xml[150]
+print( xfstr_1.xml_string[start_i:end_i])
+print("\n\n",20*",","-\n\n")
+xfstr_1.insert_tag(t, 44)
+input(
+    xfstr_1.xml_string[start_i:end_i]
+)
+xfstr_1.result_test()
