@@ -59,25 +59,33 @@ class Witness:
             changed.append((key, val))
         self.text_to_xml.update(changed)
             
-            
-    def insert_tag(self, tag: Tag, insert_before_index: int, insert_closing_after_index: int|None = None):
+    def insert_closing_tag(self, closing_tag: str, insert_closing_after_index: int):
+        xml_index = self.text_to_xml[insert_closing_after_index + 1]
+        self.xml_string = self.xml_string[:xml_index] + closing_tag + self.xml_string[xml_index:]
+        self.update_index(
+            insert_closing_after_index + 1,
+            len(closing_tag)
+        )
+        
+    def insert_opening_tag(self, opening_tag: str, insert_before_index: int):
+        xml_index = self.text_to_xml[insert_before_index]
+        self.xml_string = self.xml_string[:xml_index] + opening_tag + self.xml_string[xml_index:]
+        self.update_index(
+            insert_before_index,
+            len(opening_tag)
+        )
+    
+    def place_tag(self, tag: Tag, insert_before_index: int, insert_closing_after_index: int|None = None):
         opening, closing = tag.get_pseudo_markup()
         if insert_closing_after_index is None:
             opening += closing
+            self.insert_opening_tag(opening, insert_before_index)
         else:
             assert insert_before_index <= insert_closing_after_index, "The insert_closing_after_index value '{insert_closing_after_index}' is to small to tag anything."
-            xml_index = self.text_to_xml[insert_closing_after_index + 1]
-            self.xml_string = self.xml_string[:xml_index] + closing + self.xml_string[xml_index:]
-            self.update_index(
-                insert_closing_after_index + 1,
-                len(closing)
-            )
-        xml_index = self.text_to_xml[insert_before_index]
-        self.xml_string = self.xml_string[:xml_index] + opening + self.xml_string[xml_index:]
-        self.update_index(
-            insert_before_index,
-            len(opening)
-        )
+            self.insert_opening_tag(opening, insert_before_index)
+            self.insert_closing_tag(closing, insert_closing_after_index-1)
+
+
             
             
 
@@ -172,7 +180,8 @@ start_i = xfstr_1.text_to_xml[40]
 end_i = xfstr_1.text_to_xml[150]
 print( xfstr_1.xml_string[start_i:end_i])
 print("\n\n",20*",","-\n\n")
-xfstr_1.insert_tag(t, 44)
+input(xfstr_1.text_string[44:67])
+xfstr_1.place_tag(t, 44, 54)
 input(
     xfstr_1.xml_string[start_i:end_i]
 )
