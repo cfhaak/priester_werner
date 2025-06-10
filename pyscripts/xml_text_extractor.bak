@@ -1,90 +1,94 @@
 # import os
 # import json
 # import glob
-import html
-from lxml import etree
-from acdh_tei_pyutils.tei import TeiReader
+# from acdh_tei_pyutils.tei import TeiReader
 from stupid_statemachines import Tag
 from random import randrange
-
-# from saxonche import PySaxonProcessor
-
-
-# def xpath(
-#     xpath: str,
-#     file_path: str,
-#     namespaces: dict = {"tei": "http://www.tei-c.org/ns/1.0"},
-# ):
-#     with PySaxonProcessor(license=False) as proc:
-#         xpath_proc = proc.new_xpath_processor()
-#         print(f"cwd: {xpath_proc.cwd}")
-#         xpath_proc.set_context(file_name=file_path)
-#         for namespace, uri in namespaces.items():
-#             xpath_proc.declare_namespace(namespace, uri)
-#         result = xpath_proc.evaluate(xpath)
-#         assert not (result is None), f"xpath matched nothing in {file_path}"
-#         return result
+from saxonche import PySaxonProcessor
 
 
-class Textchunck:
+def xpath(
+    xpath: str,
+    file_path: str,
+    namespaces: dict = {"tei": "http://www.tei-c.org/ns/1.0"},
+):
+    with PySaxonProcessor(license=False) as proc:
+        xpath_proc = proc.new_xpath_processor()
+        print(f"cwd: {xpath_proc.cwd}")
+        xpath_proc.set_context(file_name=file_path)
+        for namespace, uri in namespaces.items():
+            xpath_proc.declare_namespace(namespace, uri)
+        result = xpath_proc.evaluate(xpath)
+        assert not (result is None), f"xpath matched nothing in {file_path}"
+        return result
+
+
+class Witness:
     def __init__(
         self,
-        xml_string,
-        witness,
+        file_path: str,
+        text_container_xpath: str,
+        # treat_result_as_list: bool = False,
+        namespaces: dict = None,
         replace_chars: dict = {},
         ignore_multi_whitespace: bool = True,
         skip_chars: list = ["\n", "\t"],
     ):
-        self.witness = witness
-        self.xml_string = xml_string
-        self.replace_chars = replace_chars
-        self.ignore_multi_whitespace = ignore_multi_whitespace
-        self.skip_chars = skip_chars
+
+        if namespaces is None:
+            namespaces = {"tei": "http://www.tei-c.org/ns/1.0"}
+        self.namespaces = namespaces
+        self.file_path = file_path
+        self.text_container_element = self.xpath(text_container_xpath)
+        self.xml_string = str(self.text_container_element)
+        # self.xml_to_text = {}
         self.text_to_xml = {}
         self.text_string = ""
         self.__char_list = []
-        self.create_comparison_data(replace_chars, ignore_multi_whitespace, skip_chars)
+        self.replace_chars = replace_chars
+        self.ignore_multi_whitespace = ignore_multi_whitespace
+        self.skip_chars = skip_chars
+        self.create_comparison_data()
 
     def update_index(self, insert_before_index: int, offset: int):
         """offset : amount of characters being added at insert_before_index of the text string"""
-        text_to_xml_keys_vals = [(key, val) for key, val in self.text_to_xml.items()]
-        text_to_xml_keys_vals.sort(key=lambda x: x[0], reverse=True)
+        text_to_xml_keys_vals = [(key,val) for key, val in self.text_to_xml.items()]
+        text_to_xml_keys_vals.sort(key=lambda x:x[0], reverse=True)
         changed = []
         for key, val in text_to_xml_keys_vals[insert_before_index:]:
             val += offset
             changed.append((key, val))
         self.text_to_xml.update(changed)
-
+            
     def insert_closing_tag(self, closing_tag: str, insert_closing_after_index: int):
         xml_index = self.text_to_xml[insert_closing_after_index + 1]
-        self.xml_string = (
-            self.xml_string[:xml_index] + closing_tag + self.xml_string[xml_index:]
+        self.xml_string = self.xml_string[:xml_index] + closing_tag + self.xml_string[xml_index:]
+        self.update_index(
+            insert_closing_after_index + 1,
+            len(closing_tag)
         )
-        self.update_index(insert_closing_after_index + 1, len(closing_tag))
-
+        
     def insert_opening_tag(self, opening_tag: str, insert_before_index: int):
         xml_index = self.text_to_xml[insert_before_index]
-        self.xml_string = (
-            self.xml_string[:xml_index] + opening_tag + self.xml_string[xml_index:]
+        self.xml_string = self.xml_string[:xml_index] + opening_tag + self.xml_string[xml_index:]
+        self.update_index(
+            insert_before_index,
+            len(opening_tag)
         )
-        self.update_index(insert_before_index, len(opening_tag))
-
-    def place_tag(
-        self,
-        tag: Tag,
-        insert_before_index: int,
-        insert_closing_after_index: int | None = None,
-    ):
+    
+    def place_tag(self, tag: Tag, insert_before_index: int, insert_closing_after_index: int|None = None):
         opening, closing = tag.get_pseudo_markup()
         if insert_closing_after_index is None:
             opening += closing
             self.insert_opening_tag(opening, insert_before_index)
         else:
-            assert (
-                insert_before_index <= insert_closing_after_index
-            ), "The insert_closing_after_index value '{insert_closing_after_index}' is to small to tag anything."
+            assert insert_before_index <= insert_closing_after_index, "The insert_closing_after_index value '{insert_closing_after_index}' is to small to tag anything."
             self.insert_opening_tag(opening, insert_before_index)
-            self.insert_closing_tag(closing, insert_closing_after_index - 1)
+            self.insert_closing_tag(closing, insert_closing_after_index-1)
+
+
+            
+            
 
     def result_test(self):
         string_len = len(self.text_string)
@@ -104,21 +108,9 @@ class Textchunck:
             print(self.text_string[start_text : start_text + offset])
             print("\n", 60 * "-", "\n")
             print(self.xml_string[start_xml:end_xml])
-            
-    def test(self):
-        t = Tag("span", {"type": "versuch_01"})
-        start = 44
-        start_i = self.text_to_xml[start-10]
-        end_i = self.text_to_xml[150]
-        print("xml:")
-        print(self.xml_string[start_i:end_i])
-        print("\n\n", 20 * "~", "-\n\n")
-        print("text:")
-        input(self.text_string[start:start+10])
-        self.place_tag(t, start, start+10)
-        print("\n\nplaced tag:")
-        input(self.xml_string[start_i:end_i])
-        self.result_test()
+
+    def xpath(self, xpath_query: str):
+        return xpath(xpath_query, self.file_path, self.namespaces)
 
     def create_comparison_data(
         self, replace_chars=None, ignore_multi_whitespace=None, skip_chars=None
@@ -167,54 +159,11 @@ class Textchunck:
                 if char in replace_chars:
                     char = replace_chars[char]
                 self.__char_list.append(char)
+                # self.xml_to_text[xml_string_index] = new_char_index
                 self.text_to_xml[new_char_index] = xml_string_index
                 prev_text_char = char
                 new_char_index += 1
         self.text_string = "".join(self.__char_list)
-
-
-class Witness:
-    def __init__(
-        self,
-        file_path: str,
-        text_container_xpath: str,
-        # treat_result_as_list: bool = False,
-        namespaces: dict = None,
-        replace_chars: dict = {},
-        ignore_multi_whitespace: bool = True,
-        skip_chars: list = ["\n", "\t"],
-    ):
-        # if namespaces is None:
-        #     namespaces = {"tei": "http://www.tei-c.org/ns/1.0"}
-        self.namespaces = namespaces if namespaces else {}
-        self.file_path = file_path
-        self.xml_doc = TeiReader(self.file_path)
-        self.root = self.xml_doc.tree.getroot()
-        self.text_container_elements = self.xpath(text_container_xpath)
-        self.text_chuncks = []
-        self.make_text_chuncks(replace_chars, ignore_multi_whitespace, skip_chars)
-
-    def element_to_string(self, element):
-        text = etree.tostring(element, encoding="unicode", method="text")
-        return html.unescape(text)
-
-    def make_text_chuncks(
-        self, replace_chars: dict, ignore_multi_whitespace: bool, skip_chars: list
-    ):
-        for element in self.text_container_elements:
-            xml_string = self.element_to_string(element)
-            self.text_chuncks.append(
-                Textchunck(
-                    xml_string, self, replace_chars, ignore_multi_whitespace, skip_chars
-                )
-            )
-
-    def xpath(self, xpath_query: str):
-        if self.namespaces:
-            self.tree.xpath(xpath_query, namespaces=self.namespaces)
-        return self.xml_doc.any_xpath(xpath_query)
-    
-    
 
 
 xpath_expr = "//tei:body/tei:div[1]//tei:div[@type='section']"
@@ -226,9 +175,14 @@ xfstr_2 = Witness(
     file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
     text_container_xpath=xpath_expr,
 )
-
-w1 = xfstr_1
-for t in w1.text_chuncks:
-    t.test()
-    input()
- 
+t=Tag("span", {"type":"versuch_01"})
+start_i = xfstr_1.text_to_xml[40]
+end_i = xfstr_1.text_to_xml[150]
+print( xfstr_1.xml_string[start_i:end_i])
+print("\n\n",20*",","-\n\n")
+input(xfstr_1.text_string[44:67])
+xfstr_1.place_tag(t, 44, 54)
+input(
+    xfstr_1.xml_string[start_i:end_i]
+)
+xfstr_1.result_test()
