@@ -190,7 +190,7 @@ class Witness:
         ignore_multi_whitespace: bool = True,
         skip_chars: list = ["\n", "\t"],
     ):  
-        self.sigil = sigil,
+        self.sigil = sigil
         # if namespaces is None:
         #     namespaces = {"tei": "http://www.tei-c.org/ns/1.0"}
         self.namespaces = namespaces if namespaces else {}
@@ -201,13 +201,58 @@ class Witness:
         self.text_chuncks: tuple = []
         self.make_text_chuncks(replace_chars, ignore_multi_whitespace, skip_chars)
     
+    def collatex_with_witness(self, witness, ignore_whitespace:bool=True):
+        assert type(witness) == type(self), "Atm you only can compare witness objects."
+        from collatex import Collation, collate
+        from tqdm import tqdm
+        collation = Collation()
+        collatex_data_wintess1 = self.get_collatex_data_list()
+        collatex_data_witness2 = witness.get_collatex_data_list()
+        print(f"collatex adding witness {self.sigil}")
+        collation.add_plain_witness(*collatex_data_wintess1[0])
+        print(f"collatex adding witness {witness.sigil}")
+        collation.add_plain_witness(*collatex_data_witness2[0])
+        print("Creating alignment table. This might take loooooong.")
+        alignment_table = collate(collation, output="json", layout="horizontal", segmentation=False)
+        print("\tdone")
+        json_alignment = json.loads(alignment_table)
+        w1_table = json_alignment["table"][0]
+        w2_table = json_alignment["table"][1]
+        counter = 0
+        print("checking results\n")
+        results = []
+        field = "t" if not ignore_whitespace else "n"
+        same_counter = 0
+        for token in tqdm(w1_table):
+            token_from_1 = token[0][field] if w1_table[counter] is not None else None
+            token_from_2 = w2_table[counter][0][field] if w2_table[counter] is not None else None
+            if token_from_1 is None:
+                results.append(f"witness_1 is missing '{token_from_2}'\n{30*'_'}")
+            elif token_from_2 is None:
+                results.append(f"witness_2 is missing '{token_from_1}'\n{30*'_'}")
+            elif token_from_2 != token_from_1:
+                results.append(f"witness_1: '{token_from_1}'\n\twitness_2: '{token_from_2}'\n{30*'_'}")
+            else:
+                # both the same
+                same_counter += 1
+            counter += 1
+        print("results:")
+        results.insert(0, f"{same_counter}tokens where the same")
+        print("\n\t".join(results))
+        
+        
     
     def __str__(self):
         return "".join([str(chunck) for chunck in self.text_chuncks])
     
+    def get_collatex_data_list(self):
+        return list(self.generate_collatex_data())
+    
     def generate_collatex_data(self):
+        print(f"generating collatex data for {self.sigil}")
         for chunck in self.text_chuncks:
-            yield f"{self.sigil}_{self.text_chuncks.index(chunck)}", str(chunck)
+            snippet_sigil = f"{self.sigil}_{self.text_chuncks.index(chunck)}"
+            yield snippet_sigil, str(chunck)
     
     def element_to_string(self, element):
         text = etree.tostring(element, encoding="unicode", method="text")
@@ -259,25 +304,28 @@ witness_2 = Witness(
     sigil="witness_2"
 )
 
-collation = Collation()
-collatex_data_wintess1 = list(witness_1.generate_collatex_data())
-collatex_data_witness2 = list(witness_2.generate_collatex_data())
-collation.add_plain_witness(*collatex_data_wintess1[0])
-collation.add_plain_witness(*collatex_data_witness2[0])
-alignment_table = collate(collation, output="json", layout="horizontal", segmentation=False)
-json_tab = json.loads(alignment_table)
-w1_table = json_tab["table"][0]
-w2_table = json_tab["table"][1]
-counter = 0
-max_len = len(w1_table)
-while max_len > counter:
-    token_from_1 = w1_table[counter]["t"]
-    # token_from_2 = w2_table[counter]["t"]
-    print(token_from_1)
-    # region_from_2 = w2_table[counter]
-    # if region_from_1 is None:
-    #     input(f"region {counter} is missing in w1")
-    # if region_from_2 is None:
-    #     input(f"region {counter} is missing in w1")
-    # counter += 1
-    # for t in region
+witness_1.collatex_with_witness(witness_2)
+
+# collation = Collation()
+# collatex_data_wintess1 = list(witness_1.generate_collatex_data())
+# collatex_data_witness2 = list(witness_2.generate_collatex_data())
+# collation.add_plain_witness(*collatex_data_wintess1[0])
+# collation.add_plain_witness(*collatex_data_witness2[0])
+# alignment_table = collate(collation, output="json", layout="horizontal", segmentation=False)
+# json_tab = json.loads(alignment_table)
+# w1_table = json_tab["table"][0]
+# w2_table = json_tab["table"][1]
+# counter = 0
+# max_len = len(w1_table)
+# while max_len > counter:
+#     token_from_1 = w1_table[counter][0]['t'] if w1_table[counter] is not None else None
+#     token_from_2 = w2_table[counter][0]['t'] if w2_table[counter] is not None else None
+#     if token_from_1 is None and token_from_2.strip():
+#         print(f"witness_1 is missing '{token_from_2}'")
+#     elif token_from_2 is None and token_from_1.strip():
+#         print(f"witness_2 is missing '{token_from_1}'")
+#     elif token_from_2 != token_from_1 and token_from_1.strip() and token_from_2.strip():
+#         print(f"witness_1: '{token_from_1}'\nwitness_2: '{token_from_2}'")
+#     else:
+#         # both the same
+#         pass
