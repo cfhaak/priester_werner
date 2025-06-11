@@ -2,10 +2,12 @@
 # import json
 # import glob
 import html
+import json
 from lxml import etree
 from acdh_tei_pyutils.tei import TeiReader
 from stupid_statemachines import Tag
 from random import randrange
+from collatex import Collation, collate
 
 # from saxonche import PySaxonProcessor
 
@@ -244,4 +246,38 @@ def test1():
     for t in w1.text_chuncks:
         t.test()
         input()
-        
+
+xpath_expr = "//tei:body/tei:div[1]//tei:div[@type='section']"
+witness_1 = Witness(
+    file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
+    text_container_xpath=xpath_expr,
+    sigil="witness_1"
+)
+witness_2 = Witness(
+    file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
+    text_container_xpath=xpath_expr,
+    sigil="witness_2"
+)
+
+collation = Collation()
+collatex_data_wintess1 = list(witness_1.generate_collatex_data())
+collatex_data_witness2 = list(witness_2.generate_collatex_data())
+collation.add_plain_witness(*collatex_data_wintess1[0])
+collation.add_plain_witness(*collatex_data_witness2[0])
+alignment_table = collate(collation, output="json", layout="horizontal", segmentation=False)
+json_tab = json.loads(alignment_table)
+w1_table = json_tab["table"][0]
+w2_table = json_tab["table"][1]
+counter = 0
+max_len = len(w1_table)
+while max_len > counter:
+    token_from_1 = w1_table[counter]["t"]
+    # token_from_2 = w2_table[counter]["t"]
+    print(token_from_1)
+    # region_from_2 = w2_table[counter]
+    # if region_from_1 is None:
+    #     input(f"region {counter} is missing in w1")
+    # if region_from_2 is None:
+    #     input(f"region {counter} is missing in w1")
+    # counter += 1
+    # for t in region
