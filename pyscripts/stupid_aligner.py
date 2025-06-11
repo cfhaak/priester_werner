@@ -81,5 +81,3 @@ def test():
 if __name__ == "__main__":
     # witnesses = [w for w in load_files()]
     test()
-
-        
