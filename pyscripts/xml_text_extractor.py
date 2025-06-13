@@ -1,6 +1,7 @@
 # import os
 # import json
 # import glob
+import re
 import html
 import json
 from lxml import etree
@@ -33,6 +34,7 @@ from collatex import Collation, collate
 class Textchunck:
     def __init__(
         self,
+        id: str,
         element: etree._Element,
         xml_string: str,
         witness,
@@ -40,6 +42,7 @@ class Textchunck:
         ignore_multi_whitespace: bool = True,
         skip_chars: list = ["\n", "\t"],
     ):  
+        self.id = id
         self.element: etree._Element = element
         self.witness = witness
         self.xml_string: str = xml_string
@@ -54,10 +57,22 @@ class Textchunck:
     def __str__(self):
         return self.text_string
     
+    def dump_xml(self):
+        path = f"dump_{self.id}.dump".replace("/", "").replace("\\", "")
+        with open(path, "w") as f:
+            print(self.xml_string, file=f)
+        return path
+    
     def get_updated_xml(self):
         print(self.xml_string[:100])
         print(self.xml_string[100:])
-        return etree.fromstring(self.xml_string)
+        try:
+            new_element = etree.fromstring(self.xml_string)
+            return new_element
+        except Exception as e:
+            dump_path = self.dump_xml()
+            e.add_note(f"dumped faulty markup to {dump_path}")
+            raise e
     
     def update_index(self, insert_before_index: int, offset: int):
         """offset : amount of characters being added at insert_before_index of the text string"""
@@ -99,6 +114,8 @@ class Textchunck:
             ), "The insert_closing_after_index value '{insert_closing_after_index}' is to small to tag anything."
             self.insert_opening_tag(opening, insert_before_index)
             self.insert_closing_tag(closing, insert_closing_after_index - 1)
+        offset = 20
+        input(f"inserting tag between '{self.text_string[insert_before_index - offset : insert_before_index]}' and '{self.text_string[insert_before_index : insert_before_index + offset]}'")
 
     def result_test(self):
         string_len = len(self.text_string)
@@ -115,9 +132,12 @@ class Textchunck:
             print(
                 "\n\ncheck if the text in both strings is the same (was too lazy to implement this):\n\n"
             )
-            print(self.text_string[start_text : start_text + offset])
+            t_string = self.text_string[start_text : start_text + offset]
+            x_string = self.xml_string[start_xml:end_xml]
+            
+            print(t_string)
             print("\n", 60 * "-", "\n")
-            print(self.xml_string[start_xml:end_xml])
+            print(x_string)
             
     def test(self):
         t = Tag("span", {"type": "versuch_01"})
@@ -261,17 +281,20 @@ class Witness:
             w2_current_string_index = 0
             w1_current_model = ""
             w2_current_model = ""
-            tag = Tag("difftest", {"a":"test"})
             for token in tqdm(w1_table):
                 token_from_1 = token[0][field] if w1_table[token_counter] is not None else None
                 token_from_2 = w2_table[token_counter][0][field] if w2_table[token_counter] is not None else None
                 if token_from_1 is None:
                     results.append(f"witness_1 is missing '{token_from_2}'\n{30*'_'}")
                     full_token_2 = w2_table[token_counter][0]["t"]
+                    tag = Tag("difftest_none")
+                    tag.add_attribute("w2_has", token_from_2)
                     w2_chunck.insert_tag(tag, w2_current_string_index)
                     w2_current_string_index += len(full_token_2) - 1
                 elif token_from_2 is None:
                     results.append(f"witness_2 is missing '{token_from_1}'\n{30*'_'}")
+                    tag = Tag("difftest_none")
+                    tag.add_attribute("w1_has", token_from_1)
                     w1_chunck.insert_tag(tag, w1_current_string_index)
                     full_token_1 = token[0]["t"]
                     w1_current_string_index += len(full_token_1) - 1
@@ -279,7 +302,11 @@ class Witness:
                     full_token_1 = token[0]["t"]
                     full_token_2 = w2_table[token_counter][0]["t"]
                     if token_from_2 != token_from_1:
+                        tag = Tag("difftest")
+                        tag.add_attribute("w1_has", token_from_1)
                         w2_chunck.insert_tag(tag, w2_current_string_index)
+                        tag = Tag("difftest")
+                        tag.add_attribute("w2_has", token_from_2)
                         w1_chunck.insert_tag(tag, w1_current_string_index)
                         results.append(f"witness_1: '{token_from_1}'\n\twitness_2: '{token_from_2}'\n{30*'_'}")
                     else:
@@ -303,17 +330,25 @@ class Witness:
             yield snippet_sigil, str(chunck)
     
     def element_to_string(self, element):
-        text = etree.tostring(element, encoding="unicode")
+        text = etree.tostring(element, encoding="unicode")    
         return html.unescape(text)
 
     def make_text_chuncks(
         self, replace_chars: dict, ignore_multi_whitespace: bool, skip_chars: list
     ):
+        counter = 0
         for element in self.text_container_elements:
+            counter += 1
             assert isinstance(element, etree._Element), f"Your xslt should return element nodes only, yours returned {type(element)}. Try to adress the parent elements of text elements."
             xml_string = self.element_to_string(element)
             chunck = Textchunck(
-                element, xml_string, self, replace_chars, ignore_multi_whitespace, skip_chars
+                f"{self.sigil}_{counter}",
+                element, 
+                xml_string, 
+                self, 
+                replace_chars,
+                ignore_multi_whitespace,
+                skip_chars
             )
             self.text_chuncks.append(chunck)
         self.text_chuncks = tuple(self.text_chuncks)
@@ -353,7 +388,6 @@ def test2():
         text_container_xpath=xpath_expr,
         sigil="witness_2"
     )
-
     witness_1.collatex_with_witness(witness_2, test=True)
 
-test1()
+test2()

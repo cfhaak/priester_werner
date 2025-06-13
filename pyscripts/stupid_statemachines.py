@@ -34,6 +34,9 @@ class Tag:
             attrib = Attribute(key, val)
             self.__attributes.append(attrib)
 
+    def add_attribute(self, key: str, value: str):
+        self.__attributes.append(Attribute(key, value))
+        self.__attributes_dict = None
     def append_char(self, char: str):
         if char not in ["\n", "\t", "/"]:
             if char == " ":
