@@ -18,10 +18,10 @@ class Tag:
     # ([\w|data-]+)=[\"']?((?:.(?![\"']?\s+(?:\S+)=|\s*\/?[>\"']))+.)[\"']?
     # would have worked just fine, but state machines are fun! Especially if 
     # I created bugs, you have to fix ;) have fun!!! fun!!! fun!!!
-    pseudo_markup_sequence_opening_start = "~~~~start|"
-    pseudo_markup_sequence_opening_stop = "|stop~~~~"
-    pseudo_markup_sequence_closing_start = "~~~~#start|"
-    pseudo_markup_sequence_closing_stop = "|#stop~~~~"
+    pseudo_markup_sequence_opening_start = "(["
+    pseudo_markup_sequence_opening_stop = "])"
+    pseudo_markup_sequence_closing_start = "([|"
+    pseudo_markup_sequence_closing_stop = "|])"
     
     def __init__(self, name: str="", attributes: dict = {}):
         self.name = name

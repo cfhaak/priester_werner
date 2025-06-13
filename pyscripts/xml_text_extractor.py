@@ -4,6 +4,8 @@
 import html
 import json
 from lxml import etree
+from collatex import Collation, collate
+from tqdm import tqdm
 from acdh_tei_pyutils.tei import TeiReader
 from stupid_statemachines import Tag
 from random import randrange
@@ -31,24 +33,31 @@ from collatex import Collation, collate
 class Textchunck:
     def __init__(
         self,
-        xml_string,
+        element: etree._Element,
+        xml_string: str,
         witness,
         replace_chars: dict = {},
         ignore_multi_whitespace: bool = True,
         skip_chars: list = ["\n", "\t"],
-    ):
+    ):  
+        self.element: etree._Element = element
         self.witness = witness
-        self.xml_string = xml_string
-        self.replace_chars = replace_chars
-        self.ignore_multi_whitespace = ignore_multi_whitespace
-        self.skip_chars = skip_chars
-        self.text_to_xml = {}
-        self.text_string = ""
-        self.__char_list = []
+        self.xml_string: str = xml_string
+        self.replace_chars: dict = replace_chars
+        self.ignore_multi_whitespace: bool = ignore_multi_whitespace
+        self.skip_chars: list = skip_chars
+        self.text_to_xml: dict = {}
+        self.text_string: str = ""
+        self.__char_list: list = []
         self.create_comparison_data(replace_chars, ignore_multi_whitespace, skip_chars)
 
     def __str__(self):
         return self.text_string
+    
+    def get_updated_xml(self):
+        print(self.xml_string[:100])
+        print(self.xml_string[100:])
+        return etree.fromstring(self.xml_string)
     
     def update_index(self, insert_before_index: int, offset: int):
         """offset : amount of characters being added at insert_before_index of the text string"""
@@ -74,7 +83,7 @@ class Textchunck:
         )
         self.update_index(insert_before_index, len(opening_tag))
 
-    def place_tag(
+    def insert_tag(
         self,
         tag: Tag,
         insert_before_index: int,
@@ -120,7 +129,7 @@ class Textchunck:
         print("\n\n", 20 * "~", "-\n\n")
         print("text:")
         input(self.text_string[start:start+10])
-        self.place_tag(t, start, start+10)
+        self.insert_tag(t, start, start+10)
         print("\n\nplaced tag:")
         input(self.xml_string[start_i:end_i])
         self.result_test()
@@ -190,60 +199,99 @@ class Witness:
         ignore_multi_whitespace: bool = True,
         skip_chars: list = ["\n", "\t"],
     ):  
-        self.sigil = sigil
+        self.sigil: str = sigil
         # if namespaces is None:
         #     namespaces = {"tei": "http://www.tei-c.org/ns/1.0"}
-        self.namespaces = namespaces if namespaces else {}
-        self.file_path = file_path
-        self.xml_doc = TeiReader(self.file_path)
-        self.root = self.xml_doc.tree.getroot()
+        self.namespaces: dict = namespaces if namespaces else {}
+        self.file_path: str = file_path
+        self.xml_doc: TeiReader = TeiReader(self.file_path)
+        self.root: etree._Element = self.xml_doc.tree.getroot()
         self.text_container_elements = self.xpath(text_container_xpath)
         self.text_chuncks: tuple = []
         self.make_text_chuncks(replace_chars, ignore_multi_whitespace, skip_chars)
     
-    def collatex_with_witness(self, witness, ignore_whitespace:bool=True):
-        assert type(witness) == type(self), "Atm you only can compare witness objects."
-        from collatex import Collation, collate
-        from tqdm import tqdm
-        collation = Collation()
-        collatex_data_wintess1 = self.get_collatex_data_list()
-        collatex_data_witness2 = witness.get_collatex_data_list()
-        print(f"collatex adding witness {self.sigil}")
-        collation.add_plain_witness(*collatex_data_wintess1[0])
-        print(f"collatex adding witness {witness.sigil}")
-        collation.add_plain_witness(*collatex_data_witness2[0])
-        print("Creating alignment table. This might take loooooong.")
-        alignment_table = collate(collation, output="json", layout="horizontal", segmentation=False)
-        print("\tdone")
-        json_alignment = json.loads(alignment_table)
-        w1_table = json_alignment["table"][0]
-        w2_table = json_alignment["table"][1]
-        counter = 0
-        print("checking results\n")
-        results = []
-        field = "t" if not ignore_whitespace else "n"
-        same_counter = 0
-        for token in tqdm(w1_table):
-            token_from_1 = token[0][field] if w1_table[counter] is not None else None
-            token_from_2 = w2_table[counter][0][field] if w2_table[counter] is not None else None
-            if token_from_1 is None:
-                results.append(f"witness_1 is missing '{token_from_2}'\n{30*'_'}")
-            elif token_from_2 is None:
-                results.append(f"witness_2 is missing '{token_from_1}'\n{30*'_'}")
-            elif token_from_2 != token_from_1:
-                results.append(f"witness_1: '{token_from_1}'\n\twitness_2: '{token_from_2}'\n{30*'_'}")
-            else:
-                # both the same
-                same_counter += 1
-            counter += 1
-        print("results:")
-        results.insert(0, f"{same_counter}tokens where the same")
-        print("\n\t".join(results))
-        
-        
-    
     def __str__(self):
         return "".join([str(chunck) for chunck in self.text_chuncks])
+    
+    def write_result(self, path:str=None):
+        for chunck in self.text_chuncks:
+            chunck: Textchunck
+            source_element = chunck.element
+            new_element = chunck.get_updated_xml()
+            source_element.addnext(new_element)
+            source_element.getparent().remove(source_element)
+        path = self.file_path.removesuffix(".xml")+"modded.xml"
+        print("writing to path: ", path)
+        self.xml_doc.tree_to_file(path)
+        
+    
+    def update_index(current_string_index: int, collatex_token: dict):
+        return current_string_index
+
+    def get_collations(self, witness,test=False):
+        collation = Collation()
+        collatex_data_wintess1 = self.get_collatex_data_list() if not test else self.get_collatex_data_list()[:1]
+        collatex_data_witness2 = witness.get_collatex_data_list() if not test else witness.get_collatex_data_list()[:1]
+        assert len(collatex_data_wintess1) == len(collatex_data_witness2), f"While wintess '{self.sigil}' contains {len(collatex_data_wintess1)} textchuncks witness '{witness.sigil}' contains {len(collatex_data_wintess1)}. Please make sure your xpath creates an equal amount of textchunks to compare."
+        total_amount_of_chuncks= len(collatex_data_wintess1)
+        for tc_index in range(0, total_amount_of_chuncks):
+            print(f"collatex adding witness {self.sigil} chunck {tc_index + 1}")
+            collation.add_plain_witness(*collatex_data_wintess1[tc_index])
+            print(f"collatex adding witness {witness.sigil} chunck {tc_index + 1}")
+            collation.add_plain_witness(*collatex_data_witness2[tc_index])
+            print(f"Creating alignment table {tc_index +1} of {total_amount_of_chuncks}. This might take loooooong.")
+            alignment_table = collate(collation, output="json", layout="horizontal", segmentation=False)
+            print("\tdone")
+            json_alignment = json.loads(alignment_table)
+            w1_table = json_alignment["table"][0]
+            w2_table = json_alignment["table"][1]
+            yield w1_table, w2_table, self.text_chuncks[tc_index], witness.text_chuncks[tc_index]
+    
+    def collatex_with_witness(self, witness, ignore_whitespace:bool=True, test=False):
+        assert type(witness) == type(self), f"Atm you only can compare witness objects but the provided witness is of type {type(witness)}"
+        print("checking results\n")
+        token_counter = 0
+        results = []
+        field = "t" if not ignore_whitespace else "n"
+        same_token_counter = 0
+        for w1_table, w2_table, w1_chunck, w2_chunck in self.get_collations(witness, test):
+            w1_chunck: Textchunck
+            w2_chunck: Textchunck
+            w1_current_string_index = 0
+            w2_current_string_index = 0
+            w1_current_model = ""
+            w2_current_model = ""
+            tag = Tag("difftest", {"a":"test"})
+            for token in tqdm(w1_table):
+                token_from_1 = token[0][field] if w1_table[token_counter] is not None else None
+                token_from_2 = w2_table[token_counter][0][field] if w2_table[token_counter] is not None else None
+                if token_from_1 is None:
+                    results.append(f"witness_1 is missing '{token_from_2}'\n{30*'_'}")
+                    full_token_2 = w2_table[token_counter][0]["t"]
+                    w2_chunck.insert_tag(tag, w2_current_string_index)
+                    w2_current_string_index += len(full_token_2) - 1
+                elif token_from_2 is None:
+                    results.append(f"witness_2 is missing '{token_from_1}'\n{30*'_'}")
+                    w1_chunck.insert_tag(tag, w1_current_string_index)
+                    full_token_1 = token[0]["t"]
+                    w1_current_string_index += len(full_token_1) - 1
+                else:
+                    full_token_1 = token[0]["t"]
+                    full_token_2 = w2_table[token_counter][0]["t"]
+                    if token_from_2 != token_from_1:
+                        w2_chunck.insert_tag(tag, w2_current_string_index)
+                        w1_chunck.insert_tag(tag, w1_current_string_index)
+                        results.append(f"witness_1: '{token_from_1}'\n\twitness_2: '{token_from_2}'\n{30*'_'}")
+                    else:
+                        # both the same
+                        same_token_counter += 1
+                    w1_current_string_index += len(full_token_1) - 1
+                    w2_current_string_index += len(full_token_2) - 1
+                token_counter += 1
+        print("results:")
+        results.insert(0, f"{same_token_counter}tokens where the same")
+        print("\n\t".join(results))
+        self.write_result()
     
     def get_collatex_data_list(self):
         return list(self.generate_collatex_data())
@@ -255,16 +303,17 @@ class Witness:
             yield snippet_sigil, str(chunck)
     
     def element_to_string(self, element):
-        text = etree.tostring(element, encoding="unicode", method="text")
+        text = etree.tostring(element, encoding="unicode")
         return html.unescape(text)
 
     def make_text_chuncks(
         self, replace_chars: dict, ignore_multi_whitespace: bool, skip_chars: list
     ):
         for element in self.text_container_elements:
+            assert isinstance(element, etree._Element), f"Your xslt should return element nodes only, yours returned {type(element)}. Try to adress the parent elements of text elements."
             xml_string = self.element_to_string(element)
             chunck = Textchunck(
-                xml_string, self, replace_chars, ignore_multi_whitespace, skip_chars
+                element, xml_string, self, replace_chars, ignore_multi_whitespace, skip_chars
             )
             self.text_chuncks.append(chunck)
         self.text_chuncks = tuple(self.text_chuncks)
@@ -292,40 +341,19 @@ def test1():
         t.test()
         input()
 
-xpath_expr = "//tei:body/tei:div[1]//tei:div[@type='section']"
-witness_1 = Witness(
-    file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
-    text_container_xpath=xpath_expr,
-    sigil="witness_1"
-)
-witness_2 = Witness(
-    file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
-    text_container_xpath=xpath_expr,
-    sigil="witness_2"
-)
+def test2():
+    xpath_expr = "//tei:body/tei:div[1]//tei:div[@type='section']"
+    witness_1 = Witness(
+        file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
+        text_container_xpath=xpath_expr,
+        sigil="witness_1"
+    )
+    witness_2 = Witness(
+        file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
+        text_container_xpath=xpath_expr,
+        sigil="witness_2"
+    )
 
-witness_1.collatex_with_witness(witness_2)
+    witness_1.collatex_with_witness(witness_2, test=True)
 
-# collation = Collation()
-# collatex_data_wintess1 = list(witness_1.generate_collatex_data())
-# collatex_data_witness2 = list(witness_2.generate_collatex_data())
-# collation.add_plain_witness(*collatex_data_wintess1[0])
-# collation.add_plain_witness(*collatex_data_witness2[0])
-# alignment_table = collate(collation, output="json", layout="horizontal", segmentation=False)
-# json_tab = json.loads(alignment_table)
-# w1_table = json_tab["table"][0]
-# w2_table = json_tab["table"][1]
-# counter = 0
-# max_len = len(w1_table)
-# while max_len > counter:
-#     token_from_1 = w1_table[counter][0]['t'] if w1_table[counter] is not None else None
-#     token_from_2 = w2_table[counter][0]['t'] if w2_table[counter] is not None else None
-#     if token_from_1 is None and token_from_2.strip():
-#         print(f"witness_1 is missing '{token_from_2}'")
-#     elif token_from_2 is None and token_from_1.strip():
-#         print(f"witness_2 is missing '{token_from_1}'")
-#     elif token_from_2 != token_from_1 and token_from_1.strip() and token_from_2.strip():
-#         print(f"witness_1: '{token_from_1}'\nwitness_2: '{token_from_2}'")
-#     else:
-#         # both the same
-#         pass
+test1()
