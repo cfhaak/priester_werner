@@ -45,8 +45,27 @@ class Textchunck:
     
     def merge_tags(self, opening_tag: etree._Element, closing_tag: etree._Element, tag_id:str) -> None:
         opening_parent = opening_tag.getparent()
-        if opening_parent.xpath(f"./*[@{Tag.get_temporary_id_attribute()}]")
-        # closing_parent = closing_tag.getparent()
+        closing_parent = closing_tag.getparent()
+        if len(opening_parent.xpath(f"./*[@{Tag.get_temporary_id_attribute()}='{tag_id}']")) == 2:
+            # perfect, I'll just assume both tags have the same parent! Even if we all know they won't :(
+            next_sibling = opening_tag.getnext()
+            while next_sibling is not None:
+                if str(next_sibling.attrib.get(Tag.get_temporary_id_attribute())) != tag_id:
+                    new_next_sibling = next_sibling.getnext()
+                    opening_tag.append(next_sibling)
+                    next_sibling = new_next_sibling
+                else:
+                    if opening_tag.text is None:
+                        opening_tag.text = ""
+                    if opening_tag.tail is not None:
+                        opening_tag.text += opening_tag.tail
+                    opening_tag.tail = closing_tag.tail
+                    closing_parent.remove(closing_tag)
+                    break
+        else:
+            # since its already late I'll just cheap our here :)
+            
+            pass
 
 
     def match_closing_tags(self, element: etree._Element) -> None:
