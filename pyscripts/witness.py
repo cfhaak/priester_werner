@@ -8,24 +8,6 @@ from random import randrange
 from textchunck import Textchunck
 from collatex import Collation, collate
 
-# from saxonche import PySaxonProcessor
-
-
-# def xpath(
-#     xpath: str,
-#     file_path: str,
-#     namespaces: dict = {"tei": "http://www.tei-c.org/ns/1.0"},
-# ):
-#     with PySaxonProcessor(license=False) as proc:
-#         xpath_proc = proc.new_xpath_processor()
-#         print(f"cwd: {xpath_proc.cwd}")
-#         xpath_proc.set_context(file_name=file_path)
-#         for namespace, uri in namespaces.items():
-#             xpath_proc.declare_namespace(namespace, uri)
-#         result = xpath_proc.evaluate(xpath)
-#         assert not (result is None), f"xpath matched nothing in {file_path}"
-#         return result
-
 
 class Witness:
     def __init__(
@@ -169,9 +151,9 @@ class Witness:
                     w1_current_string_index += len(full_token_1)
                     w2_current_string_index += len(full_token_2)
                 token_counter += 1
-        print("results:")
+        # print("results:")
         results.insert(0, f"{same_token_counter}tokens where the same")
-        print("\n\t".join(results))
+        # print("\n\t".join(results))
         self.write_result()
 
     def get_collatex_data_list(self):
