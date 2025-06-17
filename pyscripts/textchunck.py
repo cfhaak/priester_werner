@@ -35,15 +35,15 @@ class Textchunck:
             print(self.xml_string, file=f)
         return path
     
-    @staticmethod
-    def add_comment_to_element(element:etree.__Element, comment:str):
+    def add_comment_to_element(self, element:etree.__Element, comment:str):
         element.addprevious(
             etree.Comment(
                 comment
             )
         )
     
-    def merge_tags(self, opening_tag: etree._Element, closing_tag: etree._Element, tag_id:str) -> None:
+    
+    def merge_tags_bak(self, opening_tag: etree._Element, closing_tag: etree._Element, tag_id:str) -> None:
         opening_parent = opening_tag.getparent()
         closing_parent = closing_tag.getparent()
         if len(opening_parent.xpath(f"./*[@{Tag.get_temporary_id_attribute()}='{tag_id}']")) == 2:
@@ -67,8 +67,29 @@ class Textchunck:
             
             pass
 
+    
+    def match_closing_tags(self, element: etree._Element):
+        attrib_name = Tag.get_temporary_id_attribute()
+        added_tags = map(
+            lambda element: (
+                element.attrib.get(attrib_name),
+                element,
+            ),
+            element.xpath(f".//*[@{attrib_name}]")
+        )
+        ids_to_tags = {}
+        for tag_id, element in added_tags:
+            if tag_id in ids_to_tags:
+                ids_to_tags[tag_id].append(element)
+            else:
+                ids_to_tags[tag_id] = [element]
+        for tag_id, tags in ids_to_tags.items():
+            opening, closing = tags
+            nodes_inbetween = opening.xpath(f"following::node()[following::*[@{attrib_name}='{tag_id}']]")
+        
+                
 
-    def match_closing_tags(self, element: etree._Element) -> None:
+    def match_closing_tags_bak(self, element: etree._Element) -> None:
         added_tags = map(
             lambda element: (
                 element.attrib.get(Tag.get_temporary_id_attribute()),
@@ -87,7 +108,7 @@ class Textchunck:
                 if unsolved is not None:
                     failed_merges += 1
                     for element in unsolved:
-                        Textchunck.add_comment_to_element(
+                        self.add_comment_to_element(
                             element,
                             f"couldn't close tags with id = {tag_id}"
                         )
