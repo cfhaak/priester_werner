@@ -125,6 +125,8 @@ class Witness:
         ):
             w1_chunck: Textchunck
             w2_chunck: Textchunck
+            w1_current_string_index = 0
+            w2_current_string_index = 0
             for token in tqdm(w1_table):
                 token_from_1 = (
                     token[0][field] if w1_table[token_counter] is not None else None
@@ -211,38 +213,3 @@ class Witness:
         if self.namespaces:
             self.tree.xpath(xpath_query, namespaces=self.namespaces)
         return self.xml_doc.any_xpath(xpath_query)
-
-
-def test1():
-    xpath_expr = "//tei:body/tei:div[1]//tei:div[@type='section']"
-    xfstr_1 = Witness(
-        file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
-        text_container_xpath=xpath_expr,
-    )
-    xfstr_2 = Witness(
-        file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
-        text_container_xpath=xpath_expr,
-    )
-
-    w1 = xfstr_1
-    for t in w1.text_chuncks:
-        t.test()
-        input()
-
-
-def test2():
-    xpath_expr = "//tei:body/tei:div[1]//tei:div[@type='section']"
-    witness_1 = Witness(
-        file_path="../data/source/sfe-1901-002__1901.1_sections.xml",
-        text_container_xpath=xpath_expr,
-        sigil="witness_1",
-    )
-    witness_2 = Witness(
-        file_path="../data/source/sfe-1901-002__1901.3_sections.xml",
-        text_container_xpath=xpath_expr,
-        sigil="witness_2",
-    )
-    witness_1.collatex_with_witness(witness_2, test=True)
-
-
-test2()
