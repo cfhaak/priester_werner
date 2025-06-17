@@ -34,10 +34,49 @@ class Textchunck:
         with open(path, "w") as f:
             print(self.xml_string, file=f)
         return path
+    
+    @staticmethod
+    def add_comment_to_element(element:etree.__Element, comment:str):
+        element.addprevious(
+            etree.Comment(
+                comment
+            )
+        )
+    
+    def merge_tags(self, opening_tag: etree._Element, closing_tag: etree._Element, tag_id:str) -> None:
+        opening_parent = opening_tag.getparent()
+        if opening_parent.xpath(f"./*[@{Tag.get_temporary_id_attribute()}]")
+        # closing_parent = closing_tag.getparent()
+
+
+    def match_closing_tags(self, element: etree._Element) -> None:
+        added_tags = map(
+            lambda element: (
+                element.attrib.get(Tag.get_temporary_id_attribute()),
+                element,
+            ),
+            element.xpath(f".//*[@{Tag.get_temporary_id_attribute()}]")
+        )
+        ids_to_tags = {}
+        failed_merges = 0
+        for tag_id, element in added_tags:
+            opening_tag = ids_to_tags.get(tag_id)
+            if opening_tag is None:
+                ids_to_tags[tag_id] = element
+            else:
+                unsolved = self.merge_tags(opening_tag, element, tag_id)
+                if unsolved is not None:
+                    failed_merges += 1
+                    for element in unsolved:
+                        Textchunck.add_comment_to_element(
+                            element,
+                            f"couldn't close tags with id = {tag_id}"
+                        )
+        
 
     def get_updated_xml(self):
-        print(self.xml_string[:100])
-        print(self.xml_string[100:])
+        # print(self.xml_string[:100])
+        # print(self.xml_string[100:])
         try:
             new_element = etree.fromstring(self.xml_string)
             return new_element

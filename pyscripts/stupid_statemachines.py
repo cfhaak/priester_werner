@@ -91,3 +91,6 @@ class Tag:
         if val is None:
             return ""
         return val
+    @staticmethod
+    def get_temporary_id_attribute():
+        return Tag.__temporary_id_attrib_name

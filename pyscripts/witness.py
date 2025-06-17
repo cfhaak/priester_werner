@@ -4,7 +4,6 @@ from collatex import Collation, collate
 from tqdm import tqdm
 from acdh_tei_pyutils.tei import TeiReader
 from stupid_statemachines import Tag
-from random import randrange
 from textchunck import Textchunck
 from collatex import Collation, collate
 
@@ -40,7 +39,7 @@ class Witness:
         self.__current_id_count += 1
         numberstring = str(self.__current_id_count).rjust(5, "0")
         return f"{self.sigil}_{numberstring}"
-
+    
     def write_result(self, path: str = None):
         for chunck in self.text_chuncks:
             chunck: Textchunck
