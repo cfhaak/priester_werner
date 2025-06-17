@@ -17,13 +17,15 @@ class Tag:
     # <([a-z]*) and
     # ([\w|data-]+)=[\"']?((?:.(?![\"']?\s+(?:\S+)=|\s*\/?[>\"']))+.)[\"']?
     # would have worked just fine, but state machines are fun! Especially if 
-    # I created bugs, you have to fix ;) have fun!!! fun!!! fun!!!
-    pseudo_markup_sequence_opening_start = "(["
-    pseudo_markup_sequence_opening_stop = "])"
-    pseudo_markup_sequence_closing_start = "([|"
-    pseudo_markup_sequence_closing_stop = "|])"
+    # I created bugs, you’ll have to fix ;) have fun!!! fun!!! fun!!!
+    __pseudo_markup_sequence_opening_start = "<"
+    __pseudo_markup_sequence_opening_stop = "/>"
+    __pseudo_markup_sequence_closing_start = "<"
+    __pseudo_markup_sequence_closing_stop = "/>"
+    __temporary_id_attrib_name = "internalTIAN"
     
     def __init__(self, name: str="", attributes: dict = {}):
+        assert not " " in name, f"Invalid tag name '{name}' provided."
         self.name = name
         self.__attributes = []
         self.__name_closed = False
@@ -33,10 +35,11 @@ class Tag:
         for key, val in attributes.items():
             attrib = Attribute(key, val)
             self.__attributes.append(attrib)
-
+    
     def add_attribute(self, key: str, value: str):
         self.__attributes.append(Attribute(key, value))
         self.__attributes_dict = None
+        
     def append_char(self, char: str):
         if char not in ["\n", "\t", "/"]:
             if char == " ":
@@ -67,9 +70,10 @@ class Tag:
                     self.__attributes.append(attrib)
                     self.__attrib_name_open = True
 
-    def get_pseudo_markup(self):
-        opening = f"{self.pseudo_markup_sequence_opening_start}{self.name} {self.get_attributes_string()} {self.pseudo_markup_sequence_opening_stop}"
-        closing = f"{self.pseudo_markup_sequence_closing_start}{self.name}{self.pseudo_markup_sequence_closing_stop}"
+    def get_pseudo_markup(self, internal_tag_id: str) -> tuple[str, str]:
+        internal_id_attrib = f"{self.__temporary_id_attrib_name}='{internal_tag_id}'"
+        opening = f"{self.__pseudo_markup_sequence_opening_start}{self.name} {internal_id_attrib} {self.get_attributes_string()} {self.__pseudo_markup_sequence_opening_stop}"
+        closing = f"{self.__pseudo_markup_sequence_closing_start}{self.name} {internal_id_attrib} {self.__pseudo_markup_sequence_closing_stop}"
         return (opening, closing)
         
     def get_attributes_string(self):
