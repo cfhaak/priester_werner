@@ -4,7 +4,7 @@ from acdh_tei_pyutils.tei import TeiReader
 
 
 def is_roman(string):
-    return bool(re.match("^[IVM.]+$", string.strip()))
+    return bool(re.match("^[IVMX.]+$", string.strip()))
 
 
 xml_dir = "../data/source/"

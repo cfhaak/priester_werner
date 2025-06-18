@@ -120,13 +120,17 @@ class Witness:
                 if token_from_1 is None:
                     results.append(f"witness_1 is missing '{token_from_2}'\n{30*'_'}")
                     full_token_2 = w2_table[token_counter][0]["t"]
-                    tag = Tag("difftest_none")
-                    tag.add_attribute("w2_has", token_from_2)
+                    Tag.get_app(
+                        sigil1=self.sigil,
+                        sigil2=witness.sigil,
+                        rdg1="",
+                        rdg2=full_token_2
+                    )
                     w2_chunck.insert_tag(tag, w2_current_string_index - 1)
                     w2_current_string_index += len(full_token_2)
                 elif token_from_2 is None:
                     results.append(f"witness_2 is missing '{token_from_1}'\n{30*'_'}")
-                    tag = Tag("difftest_none")
+                    tag = Tag("rdg")
                     tag.add_attribute("w1_has", token_from_1)
                     w1_chunck.insert_tag(tag, w1_current_string_index)
                     full_token_1 = token[0]["t"]
@@ -135,10 +139,10 @@ class Witness:
                     full_token_1 = token[0]["t"]
                     full_token_2 = w2_table[token_counter][0]["t"]
                     if token_from_2 != token_from_1:
-                        tag = Tag("difftest")
+                        tag = Tag("rdg")
                         tag.add_attribute("w1_has", token_from_1)
                         w2_chunck.insert_tag(tag, w2_current_string_index - 1)
-                        tag = Tag("difftest")
+                        tag = Tag("rdg")
                         tag.add_attribute("w2_has", token_from_2)
                         w1_chunck.insert_tag(tag, w1_current_string_index - 1)
                         results.append(

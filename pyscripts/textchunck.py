@@ -35,7 +35,7 @@ class Textchunck:
             print(self.xml_string, file=f)
         return path
     
-    def add_comment_to_element(self, element:etree.__Element, comment:str):
+    def add_comment_to_element(self, element:etree._Element, comment:str):
         element.addprevious(
             etree.Comment(
                 comment
@@ -64,28 +64,64 @@ class Textchunck:
                     break
         else:
             # since its already late I'll just cheap our here :)
-            
             pass
-
     
-    def match_closing_tags(self, element: etree._Element):
+        
+    def match_closing_tags_accross_container(self, element:etree._Element):
         attrib_name = Tag.get_temporary_id_attribute()
-        added_tags = map(
-            lambda element: (
-                element.attrib.get(attrib_name),
-                element,
-            ),
-            element.xpath(f".//*[@{attrib_name}]")
-        )
         ids_to_tags = {}
-        for tag_id, element in added_tags:
-            if tag_id in ids_to_tags:
-                ids_to_tags[tag_id].append(element)
-            else:
+        for element in element.xpath(f".//*[@{attrib_name}]"):
+            tag_id = element.attrib.get(attrib_name)
+            if tag_id not in ids_to_tags:
                 ids_to_tags[tag_id] = [element]
+            else:
+                ids_to_tags[tag_id].append(element)
         for tag_id, tags in ids_to_tags.items():
             opening, closing = tags
-            nodes_inbetween = opening.xpath(f"following::node()[following::*[@{attrib_name}='{tag_id}']]")
+            for node in opening.xpath(f"following::node()[following::*[@{Tag.get_temporary_id_attribute()}='{tag_id}']]"):
+                # we now know what textnodes (& texnode containers) are part of the textual variance
+                error = NotImplementedError
+                error.add_note("Sorry, this was to hard to serialize in an abstract manner. Feel free to implement it, if you know how …")
+                raise 
+    
+    def expand_opening_tag_element(self, opening_tag: etree._Element, closing_tag: etree._Element, tag_id: str, attrib_name: str):
+            next_sibling = opening_tag.getnext()
+            while next_sibling is not None:
+                next_sibling: etree._Element
+                if str(next_sibling.attrib.get(attrib_name)) != tag_id:
+                    new_next_sibling = next_sibling.getnext()
+                    opening_tag.append(next_sibling)
+                    next_sibling = new_next_sibling
+                else:
+                    if opening_tag.text is None:
+                        opening_tag.text = ""
+                    if opening_tag.tail is not None:
+                        opening_tag.text += opening_tag.tail
+            opening_tag.tail = closing_tag.tail
+            closing_tag.getparent().remove(closing_tag)
+    
+    def match_closing_sibling_tags(self, element: etree._Element):
+        attrib_name = Tag.get_temporary_id_attribute()
+        ids_to_tags = {}
+        cross_container_pairs = []
+        for tag_id, elements in ids_to_tags.items():
+            opening_tag, closing_tag = elements
+            closing_sibling = opening_tag.xpath(f"./following-sibling::*[@{attrib_name}='{tag_id}']")
+            if closing_sibling:
+                self.expand_opening_tag_element(opening_tag, tag_id, attrib_name)
+            else:
+                cross_container_pairs.append(tag_id)
+            
+            
+    
+    def match_closing_tags(self, element: etree._Element, match_across_container=False):
+        if match_across_container:
+            self.match_closing_tags_accross_container(element)
+        else:
+            self.match_closing_sibling_tags(element)
+                
+
+            
         
                 
 

@@ -12,6 +12,25 @@ class Attribute:
     def to_string(self):
         return f'{self.name} = "{self.value}"'
 
+def get_app(sigil1:str, sigil2: str, rdg1:str, rdg2:str):
+    tag = Tag("app")
+    tag.add_child(
+        Tag(
+            "rdg",
+            {"wit":sigil1},
+            rdg1
+        )
+    )
+    tag.add_child(
+        Tag(
+            "rdg",
+            {"wit":sigil2},
+            rdg2
+        )
+    )
+    return tag
+    
+
 class Tag:
     # I know, I know
     # <([a-z]*) and
@@ -24,7 +43,7 @@ class Tag:
     __pseudo_markup_sequence_closing_stop = "/>"
     __temporary_id_attrib_name = "internalTIAN"
     
-    def __init__(self, name: str="", attributes: dict = {}):
+    def __init__(self, name: str="", attributes: dict = {}, text: str = ""):
         assert not " " in name, f"Invalid tag name '{name}' provided."
         self.name = name
         self.__attributes = []
@@ -32,10 +51,34 @@ class Tag:
         self.__attrib_val_open = False
         self.__attrib_name_open = False
         self.__attributes_dict = {}
+        self.__text = text
         for key, val in attributes.items():
             attrib = Attribute(key, val)
             self.__attributes.append(attrib)
+        self.children: list[Tag] = []
     
+    @classmethod
+    def get_app(sigil1:str, sigil2: str, rdg1:str, rdg2:str):
+        tag = Tag("app")
+        tag.add_child(
+            Tag(
+                "rdg",
+                {"wit":sigil1},
+                rdg1
+            )
+        )
+        tag.add_child(
+            Tag(
+                "rdg",
+                {"wit":sigil2},
+                rdg2
+            )
+        )
+        return tag
+    
+    def add_child(self, child):
+        self.children.append(child)
+        
     def add_attribute(self, key: str, value: str):
         self.__attributes.append(Attribute(key, value))
         self.__attributes_dict = None
