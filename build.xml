@@ -12,6 +12,11 @@
             <arg value="./shellscripts/split_witness.sh" />
         </exec>
     </target>
+    <copy todir="./data/editions" >
+        <fileset dir="./data/source/heinrich/splitted">
+            <include name="*.xml" />
+        </fileset>
+    </copy>
     <xslt in="${index}" out="${target}/index.html" style="./xslt/index.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl" />
         <classpath location="${basedir}/saxon/saxon9he.jar" />

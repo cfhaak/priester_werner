@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml"
+	schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+   <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title>Driu liet von der magd, Handschrift F</title>
+         </titleStmt>
+         <publicationStmt>
+            <p>Digitale Edition</p>
+         </publicationStmt>
+         <sourceDesc>
+            <msDesc>
+               <msIdentifier>
+                  <settlement ref="https://d-nb.info/gnd/4003614-5">Augsburg</settlement>
+                  <repository ref="https://d-nb.info/gnd/2022500-3">Staats- und Stadtbibliothek</repository>
+                  <idno>Fragm. germ. 9</idno>
+                  
+                  <altIdentifier type="Handschriftencensus">
+                     <idno>https://handschriftencensus.de/1433</idno>
+                  </altIdentifier>                  
+               </msIdentifier>
+            </msDesc>
+         </sourceDesc>
+      </fileDesc>
+   </teiHeader>
+   <text>
+      <body>
+         <l n="511" xml:id="F_002r_1"><hi rend="init">A</hi>lse frowe anna <choice><am>dc</am><ex>daz</ex></choice> ver nam</l>
+         <l n="512" xml:id="F_002r_2">daz ioachim <lb/>der ir man </l>
+         <l n="513" xml:id="F_002r_3">so sere waz gelaidegot</l>
+         <l n="514" xml:id="F_002r_4">do ware ir liber der tot</l>
+         <pb n="2v"/>
+         <l n="515" xml:id="F_002v_5">daz vil wnnecliche wip</l>
+         <l n="516" xml:id="F_002v_6">harte chelte sie ir lip</l>
+         <l n="517" xml:id="F_002v_7"><choice><am>dc</am><ex>daz</ex></choice> er ir hete eintwichen</l>
+         <l n="518" xml:id="F_002v_8"><lb/>dez waz ir clage michel</l>
+         <l n="519" xml:id="F_002v_9">vn<choice><am>&#x0304;</am><ex>d</ex></choice> so verre vaz gevaren</l>
+         <l n="520" xml:id="F_002v_10">sine tr<choice><orig ana="sup">v&#x0366;</orig><reg ana="sup">vo</reg></choice>wete <lb/>niht bewaren</l>
+         <l n="521" xml:id="F_002v_11">ir hiwisch da haime</l>
+         <l n="522" xml:id="F_002v_12" ana="last">dar vmbe waz ir laide</l>
+         <l n="523" ana="om"></l>
+         <l n="524" ana="om"></l>
+         <l n="525" ana="om"></l>
+         <l n="526" ana="om"></l>
+         <l n="527" ana="om"></l>
+         <l n="528" ana="om"></l>
+         <l n="529" ana="om"></l>
+         <l n="530" ana="om"></l>
+         <l n="531" ana="om"></l>
+         <l n="532" ana="om"></l>
+         <l n="533" xml:id="F_002v_13">daz <lb/>si vf der erde</l>
+         <l n="534" xml:id="F_002v_14">witewe scolte werden</l>
+         <l n="535" xml:id="F_002v_15">bi lebendigem mann </l>
+         <l n="536" xml:id="F_002v_16" ana="last">sie <lb/>m<choice><orig ana="sup">v&#x0366;</orig><reg ana="sup">vo</reg></choice>ze ir bleichen danne</l>
+         <l n="537" ana="om"></l>
+         <l n="538" xml:id="F_002v_17">ir scone wart verderbit</l>
+         <l n="539" xml:id="F_002v_18" ana="last">elliv ir fr<choice><orig ana="sup">o&#x036E;</orig><reg ana="sup">ov</reg></choice>de <lb/>wart irsterbit</l>
+         <l n="540" ana="om"></l>
+         <l n="541" xml:id="F_002v_19" ana="last">Die hende h<choice><orig ana="sup">o&#x036E;</orig><reg ana="sup">ov</reg></choice>p sie hohe</l>
+         <l n="542" ana="om"></l>
+         <l n="543" xml:id="F_002v_20">gegen der phalnze fro<lb/>ne</l>
+         <l n="544" xml:id="F_002v_21">gegen dem himelriche</l>
+         <l n="545" xml:id="F_002v_22">si sprah wil clageliche
+         </l>
+         <l n="546" xml:id="F_002v_23">owi gewalti<lb/>ger got</l>
+         <l n="547" xml:id="F_002v_24">mine vil inneclichen not</l>
+         <l n="548" xml:id="F_002v_25">r<choice><orig ana="sup">v&#x0366;</orig><reg ana="sup">vo</reg></choice>che dv bedenken</l>
+         <l n="549" xml:id="F_002v_26">ione <lb/>ma&#x0368;h ih niht gewenken</l>
+         <l n="550" xml:id="F_002v_27">ih ne m<choice><orig ana="sup">u&#x0366;</orig><reg ana="sup">uo</reg></choice>ze liden swaz dv wil</l>
+         
+         
+      </body>
+   </text>
+</TEI>
+

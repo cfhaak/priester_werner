@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml"
+	schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+   <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title>Driu liet von der magd, Handschrift A</title>
+         </titleStmt>
+         <publicationStmt>
+            <p>Digitaledition</p>
+         </publicationStmt>
+         <sourceDesc>
+            <msDesc>
+               <msIdentifier>
+                  <settlement ref="https://d-nb.info/gnd/4066009-6">Wien</settlement>
+                  <repository ref="https://d-nb.info/gnd/2020893-5">Österreichische
+                     Nationalbibliothek</repository>
+                  <idno>Cod. 2742*</idno>
+                  <altIdentifier type="Handschriftencensus">
+                     <idno>https://www.handschriftencensus.de/1229</idno>
+                  </altIdentifier>
+               </msIdentifier>
+            </msDesc>
+         </sourceDesc>
+      </fileDesc>
+   </teiHeader>
+   <text>
+      <body>
+         <l n="511" xml:id="A_015r_1"><hi rend="rub">A</hi>ls vrowe <lb/>anna daz v<choice><am>&#x035B;</am><ex>er</ex></choice>nam .</l>
+         <l n="512" xml:id="A_015r_2">daz <hi rend="rub">J</hi>oachim der ir man .</l>
+         <l n="513" xml:id="A_015r_3"><lb/><choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>o <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>ere waz geleidegot .</l>
+         <l n="514" xml:id="A_015r_4"><choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>i were gewe<choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>en <lb/>lieber tot .</l>
+         <l n="515" xml:id="A_015r_5">daz vil minnechliche weip .</l>
+         <l n="516" xml:id="A_015r_6"><lb/>harte quelte <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>i ir leip .</l>
+         <l n="517" xml:id="A_015r_7">daz er ir wol<choice><am>d&#x0364;</am><ex>de</ex></choice> <lb/>ge<choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>weichen . </l>
+         <l n="518" xml:id="A_015r_8" ana="last">daz chlagte <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>i h<choice><am>&#x035B;</am><ex>er</ex></choice>zechlichen . </l>
+         <l n="519" ana="om"></l>
+         <l n="520" ana="om"></l>
+         <l n="521" ana="om"></l>
+         <l n="522" ana="om"></l>
+         <l n="523" ana="om"></l>
+         <l n="524" ana="om"></l>
+         <l n="525" ana="om"></l>
+         <l n="526" ana="om"></l>
+         <l n="527" ana="om"></l>
+         <l n="528" ana="om"></l>
+         <l n="529" ana="om"></l>
+         <l n="530" ana="om"></l>
+         <l n="531" ana="om"></l>
+         <l n="532" ana="om"></l>
+         <l n="533" xml:id="A_015r_9"><lb/>daz <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>i ouf der ærden .</l>
+         <l n="534" xml:id="A_015r_10">witebe <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>olde wer<lb/>den .</l>
+         <l n="535" xml:id="A_015r_11">bey lebindegem manne .</l>
+         <l n="536" xml:id="A_015r_12"><choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>i m<choice><orig ana="sup">u&#x0364;</orig><reg ana="sup">ue</reg></choice>ste er<lb/>blaichen danne .</l>
+         <l n="538" xml:id="A_015r_13">ir <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>ch<choice><orig ana="sup">o&#x0364;</orig><reg ana="sup">oe</reg></choice>ne wart verterbet .</l>
+         <pb n="15v"/>
+         <l n="539" xml:id="A_015v_14" ana="last">alle ir frevde er<choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>terbet .</l>
+         <l n="540" ana="om"></l>
+         <l n="541" xml:id="A_015v_15" ana="last">ir hend<choice><am>d&#x0364;</am><ex>de</ex></choice> h<choice><orig ana="sup">u&#x0366;</orig><reg ana="sup">uo</reg></choice>b <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>i <lb/> <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>chone .</l>
+         <l n="542" ana="om"></l>
+         <l n="543" xml:id="A_015v_16">z<choice><orig ana="sup">v&#x0366;</orig><reg ana="sup">vo</reg></choice> d<choice><am>&#x035B;</am><ex>er</ex></choice> pfalzen frone .</l>              
+         <l n="544" xml:id="A_015v_17">zv dem <lb/>himelriche .</l>
+         <l n="545" xml:id="A_015v_18"><choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>i <choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>p<choice><am>&#x0306;</am><ex>ra</ex></choice>ch vil chlegelich .</l>            
+         <l n="546" xml:id="A_015v_19">awe <lb/>gewalteger got .</l>
+         <l n="547" xml:id="A_015v_20">min vil inrechliche <lb/>not .</l>
+         <l n="548" xml:id="A_015v_21">ger<choice><orig ana="sup">u&#x0366;</orig><reg ana="sup">uo</reg></choice>che dv bedenken .</l>
+         <l n="549" xml:id="A_015v_22">ich mak <lb/>dir niht gewenken . </l>
+         <l n="550" xml:id="A_015v_23">ich m<choice><orig ana="sup">u&#x0366;</orig><reg ana="sup">uo</reg></choice>z leiden <lb/><choice><orig ana="long_s">ſ</orig><reg ana="long_s">s</reg></choice>waz du wil .</l>
+      </body>
+   </text>
+</TEI>

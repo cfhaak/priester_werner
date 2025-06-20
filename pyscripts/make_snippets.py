@@ -8,8 +8,8 @@ import glob
 ####################
 # vars
 ####################
-in_xml_dir_glob = "./edition/data/*"
-xsl_filepath = "./edition/html/xslt/transform.xsl"
+in_xml_dir_glob = "./data/editions/*.xml"
+xsl_filepath = "./xslt/generate_snippets.xsl"
 output_dir = "./edition/html/witness_snippets"
 
 ###################
@@ -46,7 +46,9 @@ def xslt(in_xml_dir_glob: list, xsl_path: str, output_dir) -> dict:
     with PySaxonProcessor(license=False) as proc:
         xsltproc = proc.new_xslt30_processor()
         executable = xsltproc.compile_stylesheet(stylesheet_file=xsl_path)
+        input(in_xml_dir_glob)
         for file_path in glob.glob(in_xml_dir_glob):
+            print(file_path)
             document = proc.parse_xml(xml_uri=file_path)
             output_file_path=get_outputfile(
                 file_path,

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/tei_all.rng" type="application/xml"
+	schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+   <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title>Driu liet von der magd, Handschrift C</title>
+         </titleStmt>
+         <publicationStmt>
+            <p>Digitale Edition</p>
+         </publicationStmt>
+         <sourceDesc>
+            <msDesc>
+               <msIdentifier>
+                  <settlement ref="https://d-nb.info/gnd/4029713-5">Karlsruhe</settlement>
+                  <repository ref="https://d-nb.info/gnd/2005707-6">Landesbibliothek</repository>
+                  <idno>Cod. St. Peter perg. 71</idno>
+                  
+                  <altIdentifier type="Handschriftencensus">
+                     <idno>https://handschriftencensus.de/2029</idno>
+                  </altIdentifier>                  
+               </msIdentifier>
+            </msDesc>
+         </sourceDesc>
+      </fileDesc>
+   </teiHeader>
+   <text>
+      <body>
+         <l n="511" xml:id="C_004r_1"><hi rend="init">A</hi>ls vrouwe anna daz v<choice>
+               <am>&#x035B;</am>
+               <ex>er</ex>
+         </choice>nam</l>
+         <l n="512" xml:id="C_004r_2">daz ioachim ir m<unclear>an</unclear></l>
+         <l n="513" xml:id="C_004r_3"><lb/>so sere was gelei<add>di</add>got</l>
+         <l n="514" xml:id="C_004r_4">do wer ir liber der tot</l>
+         <l n="515" xml:id="C_004r_5">daz vil <lb/>wunnencliche wip</l>
+         <l n="516" xml:id="C_004r_6">herte hilt si den lip</l>
+         <l n="517" xml:id="C_004r_7">daz er <unclear>ir</unclear> <lb/>het entwichen</l>
+         <l n="518" xml:id="C_004r_8">daz was ur clage michel</l>
+         <l n="519" xml:id="C_004r_9">und so <unclear>ver</unclear><lb/>re was geuarn</l>
+         <l n="520" xml:id="C_004r_10">si trůt nicht bewarn</l>
+         <l n="521" xml:id="C_004r_11">ir hiwi<unclear>sh</unclear> da heime</l>
+         <l n="522" xml:id="C_004r_12" ana="last">dar umme was ir vil leide</l>
+         <l n="523" ana="om"></l>
+         <l n="524" ana="om"></l>
+         <l n="525" ana="om"></l>
+         <l n="526" ana="om"></l>
+         <l n="527" ana="om"></l>
+         <l n="528" ana="om"></l>
+         <l n="529" ana="om"></l>
+         <l n="530" ana="om"></l>
+         <l n="531" ana="om"></l>
+         <l n="532" ana="om"></l>
+         <l n="533" xml:id="C_004r_13">daz si uffe der <lb/>erden</l>
+         <l n="534" xml:id="C_004r_14">scholte witebe w<choice>
+               <am>&#x035B;</am>
+               <ex>er</ex>
+         </choice>den</l>
+         <l n="535" xml:id="C_004r_15">bi lebendingem man</l>
+         <l n="536" xml:id="C_004r_16" ana="last"><lb/>si muste erbleichen dan</l>
+         <l n="537" ana="om"></l>
+         <l n="538" xml:id="C_004r_17">ir schone wart v<choice>
+               <am>&#x035B;</am>
+               <ex>er</ex>
+         </choice>derb<unclear>et</unclear></l>
+         <pb n="4v"/>
+         <l n="539" xml:id="C_004v_18"><unclear>a</unclear>lle ir vreude wart d<choice>
+               <am>&#x035B;</am>
+               <ex>er</ex>
+         </choice>schreket</l>
+         <l n="540" xml:id="C_004v_19">ir iam<choice>
+               <am>&#x035B;</am>
+               <ex>er</ex>
+         </choice> wart derwek<lb/><unclear>e</unclear>t</l>
+         <l n="541" xml:id="C_004v_20" ana="last">di hende hub si hohe</l>
+         <l n="542" ana="om"></l>
+         <l n="543" xml:id="C_004v_21">gein der phabize vrone</l>
+         <l n="544" xml:id="C_004v_22">gein <lb/><unclear>d</unclear>em himelriche</l>
+         <l n="545" xml:id="C_004v_23">si sprach vil tugentliche</l>
+         <l n="546" xml:id="C_004v_24">ouwe du <lb/>gewaltiger got</l>
+         <l n="547" xml:id="C_004v_25">mine vil innencliche not</l>
+         <l n="548" xml:id="C_004v_26">geruche <lb/>zu bekennen</l>
+         <l n="549" xml:id="C_004v_27">io enmak ich nicht gewenken</l>
+         <l n="550" xml:id="C_004v_28"><lb/>ich m<choice><orig ana="sup">u&#x0364;</orig><reg ana="sup">ue</reg></choice>z liden waz du wilt</l>
+         
+         
+      </body>
+   </text>
+</TEI>
+
