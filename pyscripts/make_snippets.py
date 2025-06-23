@@ -10,7 +10,8 @@ import glob
 ####################
 in_xml_dir_glob = "./data/editions/*.xml"
 xsl_filepath = "./xslt/generate_snippets.xsl"
-output_dir = "./edition/html/witness_snippets"
+output_dir = "./html/witness_snippets"
+docid_xpath = "//tei:witness[1]/@xml:id"
 
 ###################
 # checks
@@ -34,7 +35,7 @@ def get_outputfile(input_path: str, output_dir: str) -> str:
 
 def get_uid(xml_filepath: str, xpath="//tei:titleStmt/tei:title/text()"):
     doc = TeiReader(xml_filepath)
-    title = doc.any_xpath(xpath)[0]
+    title = doc.any_xpath(docid_xpath)[0]
     return title
 
 def xslt(in_xml_dir_glob: list, xsl_path: str, output_dir) -> dict:

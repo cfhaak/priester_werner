@@ -19,7 +19,7 @@
         </exec>
     </target>
     <copy todir="./data/editions">
-        <fileset dir="./data/source/heinrich/splitted">
+        <fileset dir="./data/source/parzival/splitted">
             <include name="*.xml" />
         </fileset>
     </copy>
@@ -36,11 +36,6 @@
         <classpath location="${basedir}/saxon/saxon9he.jar" />
     </xslt>
     <xslt style="./xslt/editions.xsl" basedir="./data/editions" destdir="${target}" includes="*.xml">
-        <factory name="net.sf.saxon.TransformerFactoryImpl" />
-        <classpath location="${basedir}/saxon/saxon9he.jar" />
-    </xslt>
-    <xslt style="./xslt/generate_snippets.xsl" basedir="./data/editions" destdir="${snippet_dir}"
-        includes="*.xml">
         <factory name="net.sf.saxon.TransformerFactoryImpl" />
         <classpath location="${basedir}/saxon/saxon9he.jar" />
     </xslt>

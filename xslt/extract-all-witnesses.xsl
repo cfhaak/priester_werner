@@ -13,28 +13,25 @@
         select="concat(@xml:id, '.xml')" />
       <xsl:result-document
         href="./data/source/parzival/splitted/{$file-name}">
+        <xsl:message><xsl:value-of select="concat('./data/source/parzival/splitted/',$file-name)"></xsl:value-of></xsl:message>
         <TEI xmlns="http://www.tei-c.org/ns/1.0">
           <xsl:apply-templates select="//tei:teiHeader" mode="header">
             <xsl:with-param name="wit-id" select="$wit-id" />
           </xsl:apply-templates>
-          <!-- <xsl:apply-templates select="//tei:teiHeader" mode="extract">
-            <xsl:with-param name="wit-id" select="$wit-id" />
-          </xsl:apply-templates> -->
           <text>
-            <body>
               <xsl:apply-templates select="//tei:body" mode="extract">
                 <xsl:with-param name="wit-id" select="$wit-id" />
               </xsl:apply-templates>
-            </body>
+            
           </text>
         </TEI>
       </xsl:result-document>
     </xsl:for-each>
   </xsl:template>
-  
-  <xsl:template match="tei:teiHeader" mode="#default">
+
+  <xsl:template match="tei:teiHeader" mode="header">
     <xsl:param name="wit-id" />
-    <tei:teiHeader>
+  <tei:teiHeader>
       <xsl:apply-templates
         select="tei:fileDesc | tei:encodingDesc | tei:profileDesc | tei:revisionDesc" mode="header">
         <xsl:with-param name="wit-id" select="$wit-id" />
@@ -42,13 +39,12 @@
     </tei:teiHeader>
   </xsl:template>
 
-  <xsl:template match="tei:listWit" mode="header">
-    <xsl:param name="wit-id" />
+<xsl:template match="tei:listWit" mode="header">
+  <xsl:param name="wit-id" />
   <tei:listWit>
-      <xsl:apply-templates select="tei:witness[@xml:id = substring-after($wit-id, '#')]"
-        mode="header" />
-    </tei:listWit>
-  </xsl:template>
+    <xsl:apply-templates select="tei:witness[normalize-space(@xml:id) = substring-after($wit-id, '#')]" mode="header"/>
+  </tei:listWit>
+</xsl:template>
 
   <xsl:template match="tei:witness" mode="header">
     <xsl:copy-of select="." />
