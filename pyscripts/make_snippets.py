@@ -12,6 +12,7 @@ in_xml_dir_glob = "./data/editions/*.xml"
 xsl_filepath = "./xslt/generate_snippets.xsl"
 output_dir = "./html/witness_snippets"
 docid_xpath = "//tei:witness[1]/@xml:id"
+sorting_xpath = None
 
 ###################
 # checks
@@ -33,10 +34,14 @@ def get_outputfile(input_path: str, output_dir: str) -> str:
     filename = os.path.basename(input_path).removesuffix(".xml")
     return os.path.join(output_dir, filename)+".snpt"
 
-def get_uid(xml_filepath: str, xpath="//tei:titleStmt/tei:title/text()"):
-    doc = TeiReader(xml_filepath)
-    title = doc.any_xpath(docid_xpath)[0]
-    return title
+def get_uid(doc:TeiReader, xpath="//tei:titleStmt/tei:title/text()"):
+    return doc.any_xpath(docid_xpath)[0]
+
+def get_sorting(doc: TeiReader):
+    if sorting_xpath:
+        return doc.any_xpath(sorting_xpath)[0]
+    else:
+        return doc.any_xpath(docid_xpath)[0]
 
 def xslt(in_xml_dir_glob: list, xsl_path: str, output_dir) -> dict:
     # this dict could become a container for metadata used in json, 
@@ -55,8 +60,13 @@ def xslt(in_xml_dir_glob: list, xsl_path: str, output_dir) -> dict:
                 output_dir
             )
             print(f"writing {output_file_path}")
-            uid = get_uid(file_path)
-            snippet_paths[uid] = output_file_path.split("html/", 1)[1]
+            tei_doc = TeiReader(file_path)
+            uid = get_uid(tei_doc)
+            sorting = get_sorting(tei_doc)
+            snippet_paths[uid] = {
+                "filepath":output_file_path.split("html/", 1)[1],
+                "sorting":sorting
+            }
             executable.transform_to_file(
                 xdm_node=document,
                 output_file=output_file_path

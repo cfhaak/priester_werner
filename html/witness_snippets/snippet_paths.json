@@ -1,0 +1,42 @@
+{
+    "Bb": {
+        "filepath": "witness_snippets/Bb.snpt",
+        "sorting": "Bb"
+    },
+    "Ba": {
+        "filepath": "witness_snippets/Ba.snpt",
+        "sorting": "Ba"
+    },
+    "tr_A": {
+        "filepath": "witness_snippets/tr_A.snpt",
+        "sorting": "tr_A"
+    },
+    "C": {
+        "filepath": "witness_snippets/C.snpt",
+        "sorting": "C"
+    },
+    "F": {
+        "filepath": "witness_snippets/F.snpt",
+        "sorting": "F"
+    },
+    "E": {
+        "filepath": "witness_snippets/E.snpt",
+        "sorting": "E"
+    },
+    "A": {
+        "filepath": "witness_snippets/A.snpt",
+        "sorting": "A"
+    },
+    "D": {
+        "filepath": "witness_snippets/D.snpt",
+        "sorting": "D"
+    },
+    "tr_Ba": {
+        "filepath": "witness_snippets/tr_Ba.snpt",
+        "sorting": "tr_Ba"
+    },
+    "tr_Bb": {
+        "filepath": "witness_snippets/tr_Bb.snpt",
+        "sorting": "tr_Bb"
+    }
+}

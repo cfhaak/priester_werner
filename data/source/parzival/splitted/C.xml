@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader>
-      <fileDesc>
+<?xml version="1.0" encoding="UTF-8"?><TEI xmlns="http://www.tei-c.org/ns/1.0"><tei:teiHeader xmlns:tei="http://www.tei-c.org/ns/1.0"><fileDesc>
          <titleStmt>
             <title>Der arme Heinrich. Textgeschichtliche elektronische Ausgabe</title>
             <author>Hartmann von Aue</author>
@@ -28,7 +27,7 @@
             </availability>
          </publicationStmt>
          <sourceDesc>
-            <tei:listWit xmlns:tei="http://www.tei-c.org/ns/1.0"><witness xml:id="C">
+            <tei:listWit><witness xml:id="C">
                   <msDesc>
                      <msIdentifier>
                         <settlement>Berlin</settlement>
@@ -38,13 +37,11 @@
                   </msDesc>
                </witness></tei:listWit>
          </sourceDesc>
-      </fileDesc>
-      <revisionDesc>
+      </fileDesc><revisionDesc>
          <listChange>
             <change>internal2018-06-01https://orcid.org/0000-0002-7683-8892 https://orcid.org/0000-0002-2202-6354introduced xml:id for verses tagged as 'missing', corrected sequence of pieces in fragment C</change>
          </listChange>
-      </revisionDesc>
-   </teiHeader><text><body><body>
+      </revisionDesc></tei:teiHeader><text><body>
          <div xml:id="DAH_synoptische_transkription">
             
             
@@ -7151,4 +7148,4 @@
                </tei:l>
             
          </div>
-      </body></body></text></TEI>
+      </body></text></TEI>
