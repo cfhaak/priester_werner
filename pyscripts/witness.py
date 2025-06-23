@@ -100,59 +100,69 @@ class Witness:
         results = []
         field = "t" if not ignore_whitespace else "n"
         same_token_counter = 0
-        for w1_table, w2_table, w1_chunck, w2_chunck in self.get_collations(
+        for w1_table, w2_table, own_chunck, other_witness_chunck in self.get_collations(
             witness,
             test
         ):
-            w1_chunck: Textchunck
-            w2_chunck: Textchunck
-            w1_current_string_index = 0
-            w2_current_string_index = 0
+            own_chunck: Textchunck
+            other_witness_chunck: Textchunck
+            own_current_string_index = 0
+            other_witness_current_string_index = 0
             for token in tqdm(w1_table):
-                token_from_1 = (
+                own_token = (
                     token[0][field] if w1_table[token_counter] is not None else None
                 )
-                token_from_2 = (
+                other_token = (
                     w2_table[token_counter][0][field]
                     if w2_table[token_counter] is not None
                     else None
                 )
-                if token_from_1 is None:
-                    results.append(f"witness_1 is missing '{token_from_2}'\n{30*'_'}")
-                    full_token_2 = w2_table[token_counter][0]["t"]
-                    Tag.get_app(
+                if own_token is None:
+                    results.append(f"witness_1 is missing '{other_token}'\n{30*'_'}")
+                    full_other_token = w2_table[token_counter][0]["t"]
+                    tag = Tag.get_app(
                         sigil1=self.sigil,
                         sigil2=witness.sigil,
                         rdg1="",
-                        rdg2=full_token_2
+                        rdg2=full_other_token
                     )
-                    w2_chunck.insert_tag(tag, w2_current_string_index - 1)
-                    w2_current_string_index += len(full_token_2)
-                elif token_from_2 is None:
-                    results.append(f"witness_2 is missing '{token_from_1}'\n{30*'_'}")
-                    tag = Tag("rdg")
-                    tag.add_attribute("w1_has", token_from_1)
-                    w1_chunck.insert_tag(tag, w1_current_string_index)
-                    full_token_1 = token[0]["t"]
-                    w1_current_string_index += len(full_token_1)
+                    insert_before_index = own_current_string_index
+                    own_chunck.insert_tag(tag, insert_before_index)
+                    other_witness_current_string_index += len(full_other_token)
+                elif other_token is None:
+                    results.append(f"witness_2 is missing '{own_token}'\n{30*'_'}")
+                    full_own_token = token[0]["t"]
+                    tag = Tag.get_app(
+                        sigil1=witness.sigil,
+                        sigil2=self.sigil,
+                        rdg1=full_own_token,
+                        rdg2=""
+                    )
+                    insert_before_index = own_current_string_index
+                    insert_after_index = own_current_string_index + len(full_own_token)
+                    own_chunck.insert_tag(tag, insert_before_index, insert_after_index)
+                    own_current_string_index += len(full_own_token)
                 else:
-                    full_token_1 = token[0]["t"]
-                    full_token_2 = w2_table[token_counter][0]["t"]
-                    if token_from_2 != token_from_1:
-                        tag = Tag("rdg")
-                        tag.add_attribute("w1_has", token_from_1)
-                        w2_chunck.insert_tag(tag, w2_current_string_index - 1)
-                        tag = Tag("rdg")
-                        tag.add_attribute("w2_has", token_from_2)
-                        w1_chunck.insert_tag(tag, w1_current_string_index - 1)
+                    full_own_token = token[0]["t"]
+                    full_other_token = w2_table[token_counter][0]["t"]
+                    if other_token != own_token:
+                        tag = Tag.get_app(
+                            sigil2=witness.sigil,
+                            sigil1=self.sigil,
+                            rdg2=full_other_token,
+                            rdg1=full_own_token
+                        )
+                        insert_before_index = own_current_string_index
+                        insert_after_index = own_current_string_index + len(full_own_token)
+                        own_chunck.insert_tag(tag, insert_before_index, insert_after_index)
                         results.append(
-                            f"witness_1: '{token_from_1}'\n\twitness_2: '{token_from_2}'\n{30*'_'}"
+                            f"witness_1: '{own_token}'\n\twitness_2: '{other_token}'\n{30*'_'}"
                         )
                     else:
                         # both the same
                         same_token_counter += 1
-                    w1_current_string_index += len(full_token_1)
-                    w2_current_string_index += len(full_token_2)
+                    own_current_string_index += len(full_own_token)
+                    other_witness_current_string_index += len(full_other_token)
                 token_counter += 1
         # print("results:")
         results.insert(0, f"{same_token_counter}tokens where the same")
