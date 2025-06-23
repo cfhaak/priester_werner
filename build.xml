@@ -7,12 +7,18 @@
     <delete>
         <fileset dir="${target}" includes="*.html" />
     </delete>
+    <delete>
+        <fileset dir="${snippet_dir}" includes="*.html" />
+    </delete>
+    <delete>
+        <fileset dir="${snippet_dir}" includes="*.json" />
+    </delete>
     <target name="split-witness">
         <exec executable="bash">
             <arg value="./shellscripts/split_witness.sh" />
         </exec>
     </target>
-    <copy todir="./data/editions" >
+    <copy todir="./data/editions">
         <fileset dir="./data/source/heinrich/splitted">
             <include name="*.xml" />
         </fileset>
@@ -22,11 +28,6 @@
         <classpath location="${basedir}/saxon/saxon9he.jar" />
     </xslt>
     <xslt in="${index}" out="${target}/column_viewer.html" style="./xslt/column_viewer.xsl">
-        <factory name="net.sf.saxon.TransformerFactoryImpl" />
-        <classpath location="${basedir}/saxon/saxon9he.jar" />
-    </xslt>
-    <xslt in="${index}" out="${snippet_dir}/snippet_paths.json"
-        style="./xslt/create_witness_json.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl" />
         <classpath location="${basedir}/saxon/saxon9he.jar" />
     </xslt>
@@ -99,4 +100,9 @@
             <include name="**/*.xml" />
         </fileset>
     </copy>
+    <target name="create snippets">
+        <exec executable="bash">
+            <arg value="./shellscripts/split_witness.sh" />
+        </exec>
+    </target>
 </project>

@@ -1,6 +1,0 @@
-<root>
-<div lang="de">
-{"message":"Validation error.\n{\n  \"serviceId\": [\n    \"Invalid value: Expected >=1 but received 0\"\n  ]\n}"}</div>
-<div lang="en">
-{"message":"Validation error.\n{\n  \"serviceId\": [\n    \"Invalid value: Expected >=1 but received 0\"\n  ]\n}"}</div>
-</root>

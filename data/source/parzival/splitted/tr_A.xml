@@ -5,12 +5,12 @@
             <author>Hartmann von Aue</author>
             <respStmt>
                <resp>hrsg. von</resp>
-               <persName ref="https://orcid.org/0000-0002-7683-8892">Victor Millet</persName>
-               <persName ref="https://orcid.org/0000-0002-2202-6354">Gustavo Fernández Riva&gt;</persName>
+               <persName>https://orcid.org/0000-0002-7683-8892Victor Millet</persName>
+               <persName>https://orcid.org/0000-0002-2202-6354Gustavo Fernández Riva&gt;</persName>
             </respStmt>
             <respStmt>
                <resp>unter Mitarbeit von</resp>
-               <persName ref="http://d-nb.info/gnd/1037976495">Jakub Šimek</persName>
+               <persName>http://d-nb.info/gnd/1037976495Jakub Šimek</persName>
             </respStmt>
             <respStmt>
                <resp>Übersetzungen von</resp>
@@ -22,97 +22,20 @@
          <publicationStmt>
             <publisher>Universitätsbibliothek Heidelberg</publisher>
             <pubPlace>Heidelberg</pubPlace>
-            <idno type="d.o.i.">10.11588/edition.ahd</idno>
+            <idno>d.o.i.10.11588/edition.ahd</idno>
             <availability>
                <p>Creative Commons-Lizenz 4.0 (CC BY-SA 4.0)</p>
             </availability>
          </publicationStmt>
          <sourceDesc>
-            <listWit>
-               <witness xml:id="A">
-                  <msDesc>
-                     <msIdentifier>
-                        <settlement>Straßburg</settlement>
-                        <repository>Stadtbibliothek</repository>
-                        <idno>Cod. A 94</idno>
-                     </msIdentifier>
-                     <p>Vermisst seit 1870</p>
-                  </msDesc>
-               </witness>
-               <witness xml:id="tr_A">
+            <tei:listWit xmlns:tei="http://www.tei-c.org/ns/1.0"><witness xml:id="tr_A">
                   Übersetzung der Fassung A von <persName>Dietmar Peschel</persName>
-               </witness>
-               <witness xml:id="Ba">
-                  <msDesc>
-                     <msIdentifier>
-                        <settlement>Heidelberg</settlement>
-                        <repository> Universitätsbibliothek</repository>
-                        <idno>Cod. Pal. germ. 341</idno>
-                     </msIdentifier>
-                  </msDesc>
-               </witness>
-               <witness xml:id="Bb">
-                  <msDesc>
-                     <msIdentifier>
-                        <settlement>Cologny-Genf</settlement>
-                        <repository>Fondation Martin Bodmer</repository>
-                        <idno>Cod. Bodmer 72</idno>
-                        <altIdentifier>
-                           <settlement>Kalocsa</settlement>
-                           <repository>Katedralbibl.</repository>
-                           <idno>Ms. 1</idno>
-                        </altIdentifier>
-                     </msIdentifier>
-                  </msDesc>
-               </witness>
-               <witness xml:id="tr_Ba">
-                  Übersetzung der Fassung Ba nach der Handschrift Ba von <persName>Dietmar Peschel</persName>
-               </witness>
-               <witness xml:id="tr_Bb">
-                  Übersetzung der Fassung Bb nach der Handschrift Bb von <persName>Dietmar Peschel</persName>
-               </witness>
-               <witness xml:id="C">
-                  <msDesc>
-                     <msIdentifier>
-                        <settlement>Berlin</settlement>
-                        <repository>Staatsbibliothek zu Berlin - Preußischer Kulturbesitz</repository>
-                        <idno>Ms. germ. fol. 923 Nr. 7a</idno>
-                     </msIdentifier>
-                  </msDesc>
-               </witness>
-               <witness xml:id="D">
-                  <msDesc>
-                     <msIdentifier>
-                        <settlement>München</settlement>
-                        <repository>Bayerische Staatsbibliothek</repository>
-                        <idno>cgm. 5249 (29a/30a)</idno>
-                     </msIdentifier>
-                  </msDesc>
-               </witness>
-               <witness xml:id="E">
-                  <msDesc>
-                     <msIdentifier>
-                        <settlement>München</settlement>
-                        <repository>Bayerische Staatsbibliothek</repository>
-                        <idno>cgm. 5249 (29b)</idno>
-                     </msIdentifier>
-                  </msDesc>
-               </witness>
-               <witness xml:id="F">
-                  <msDesc>
-                     <msIdentifier>
-                        <settlement>Freiburg</settlement>
-                        <repository>Universitätsbibliothek</repository>
-                        <idno>Hs. 381, fol. 72r</idno>
-                     </msIdentifier>
-                  </msDesc>
-               </witness>
-            </listWit>
+               </witness></tei:listWit>
          </sourceDesc>
       </fileDesc>
       <revisionDesc>
          <listChange>
-            <change type="internal" when="2018-06-01" who="https://orcid.org/0000-0002-7683-8892 https://orcid.org/0000-0002-2202-6354">introduced xml:id for verses tagged as 'missing', corrected sequence of pieces in fragment C</change>
+            <change>internal2018-06-01https://orcid.org/0000-0002-7683-8892 https://orcid.org/0000-0002-2202-6354introduced xml:id for verses tagged as 'missing', corrected sequence of pieces in fragment C</change>
          </listChange>
       </revisionDesc>
    </teiHeader><text><body><body>
