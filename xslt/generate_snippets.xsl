@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:tei="http://www.tei-c.org/ns/1.0"
-    exclude-result-prefixes="tei">
+    xmlns:tei="http://www.tei-c.org/ns/1.0" exclude-result-prefixes="tei">
     <xsl:output method="html" omit-xml-declaration="yes" encoding="UTF-8"/>
 
     <xsl:strip-space elements="tei:choice" />
     <xsl:template match="tei:teiHeader">
 
+    </xsl:template>
+    <xsl:template match="tei:note[@type='editorial']">
+        <span class="editorial_note">
+            <xsl:apply-templates/>
+        </span>
     </xsl:template>
     <xsl:template match="tei:choice">
         <span class="choice">
@@ -117,27 +121,29 @@
             <xsl:apply-templates/>
         </p>
     </xsl:template>
-
+    <xsl:template match="//tei:choice[tei:orig]">
+        <xsl:apply-templates/>
+    </xsl:template>
+    <xsl:template match="tei:orig">
+        <xsl:apply-templates/>
+    </xsl:template>
+    <xsl:template match="tei:reg">
+    </xsl:template>
     <!-- Abstract template for lines -->
     <xsl:template name="render-line">
         <xsl:param name="class" />
         <xsl:param name="linenr-global" />
         <xsl:param name="linenr-own" />
 
-        <span 
-            class="witness-line {$class}" 
-            data-n="{$linenr-global}" 
-            id="{$linenr-global}"
-            ondblclick="handleDoubleClick(event, '{$linenr-global}')"
-        >
-                <span class="linenr-global">
-                    <xsl:value-of select="$linenr-global" />
+        <span class="witness-line {$class}" data-n="{$linenr-global}" id="{$linenr-global}" ondblclick="handleDoubleClick(event, '{$linenr-global}')">
+            <span class="linenr-global">
+                <xsl:value-of select="$linenr-global" />
                     &#160;&#160;
-                </span>
-                <span class="linenr_own">
-                    <xsl:value-of select="$linenr-own" />
+            </span>
+            <span class="linenr_own">
+                <xsl:value-of select="$linenr-own" />
                     &#160;&#160;
-                </span>
+            </span>
             <xsl:apply-templates />
             <br />
         </span>

@@ -1,42 +1,52 @@
 {
-    "Bb": {
-        "filepath": "witness_snippets/Bb.snpt",
-        "sorting": "Bb"
-    },
-    "Ba": {
-        "filepath": "witness_snippets/Ba.snpt",
-        "sorting": "Ba"
-    },
-    "tr_A": {
-        "filepath": "witness_snippets/tr_A.snpt",
-        "sorting": "tr_A"
-    },
-    "C": {
-        "filepath": "witness_snippets/C.snpt",
-        "sorting": "C"
+    "tr_Bb": {
+        "filepath": "witness_snippets/tr_Bb.snpt",
+        "sorting": "tr_Bb",
+        "title": "Der arme Heinrich tr_Bb"
     },
     "F": {
         "filepath": "witness_snippets/F.snpt",
-        "sorting": "F"
-    },
-    "E": {
-        "filepath": "witness_snippets/E.snpt",
-        "sorting": "E"
+        "sorting": "F",
+        "title": "Der arme Heinrich F"
     },
     "A": {
         "filepath": "witness_snippets/A.snpt",
-        "sorting": "A"
+        "sorting": "A",
+        "title": "Der arme Heinrich A"
+    },
+    "Bb": {
+        "filepath": "witness_snippets/Bb.snpt",
+        "sorting": "Bb",
+        "title": "Der arme Heinrich Bb"
+    },
+    "C": {
+        "filepath": "witness_snippets/C.snpt",
+        "sorting": "C",
+        "title": "Der arme Heinrich C"
+    },
+    "Ba": {
+        "filepath": "witness_snippets/Ba.snpt",
+        "sorting": "Ba",
+        "title": "Der arme Heinrich Ba"
+    },
+    "E": {
+        "filepath": "witness_snippets/E.snpt",
+        "sorting": "E",
+        "title": "Der arme Heinrich E"
     },
     "D": {
         "filepath": "witness_snippets/D.snpt",
-        "sorting": "D"
+        "sorting": "D",
+        "title": "Der arme Heinrich D"
     },
     "tr_Ba": {
         "filepath": "witness_snippets/tr_Ba.snpt",
-        "sorting": "tr_Ba"
+        "sorting": "tr_Ba",
+        "title": "Der arme Heinrich tr_Ba"
     },
-    "tr_Bb": {
-        "filepath": "witness_snippets/tr_Bb.snpt",
-        "sorting": "tr_Bb"
+    "tr_A": {
+        "filepath": "witness_snippets/tr_A.snpt",
+        "sorting": "tr_A",
+        "title": "Der arme Heinrich tr_A"
     }
 }

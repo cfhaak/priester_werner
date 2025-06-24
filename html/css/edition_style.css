@@ -199,6 +199,10 @@ button.remove-column-button {
     text-align: center;
 }
 
+span.editorial_note {
+    display: none;
+}
+
 .hidden {
     display: none!important;
 }

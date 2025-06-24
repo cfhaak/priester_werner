@@ -13,16 +13,22 @@
     <delete>
         <fileset dir="${snippet_dir}" includes="*.json" />
     </delete>
-    <target name="split-witness">
-        <exec executable="bash">
-            <arg value="./shellscripts/split_witness.sh" />
-        </exec>
-    </target>
+    <!-- 
+    START
+    I put that here for testing, should be removed in production.
+    -->
+    <exec executable="bash">
+        <arg value="./shellscripts/split_witness.sh" />
+    </exec>
     <copy todir="./data/editions">
         <fileset dir="./data/source/parzival/splitted">
             <include name="*.xml" />
         </fileset>
     </copy>
+    <!-- 
+    I put that here for testing, should be removed in production. 
+    END
+    -->
     <xslt in="${index}" out="${target}/index.html" style="./xslt/index.xsl">
         <factory name="net.sf.saxon.TransformerFactoryImpl" />
         <classpath location="${basedir}/saxon/saxon9he.jar" />
@@ -95,9 +101,15 @@
             <include name="**/*.xml" />
         </fileset>
     </copy>
-    <target name="create snippets">
-        <exec executable="bash">
-            <arg value="./shellscripts/split_witness.sh" />
-        </exec>
-    </target>
+    <!-- 
+    START
+    I put that here for testing, should be removed in production.
+    -->
+    <exec executable="python">
+        <arg value="./pyscripts/make_snippets.py" />
+    </exec>
+    <!-- 
+    I put that here for testing, should be removed in production.
+    END
+    -->
 </project>
