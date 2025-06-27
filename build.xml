@@ -21,7 +21,7 @@
         <arg value="./shellscripts/split_witness.sh" />
     </exec>
     <copy todir="./data/editions">
-        <fileset dir="./data/source/parzival/splitted">
+        <fileset dir="./data/source/heinrich/splitted">
             <include name="*.xml" />
         </fileset>
     </copy>

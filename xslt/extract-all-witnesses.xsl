@@ -12,8 +12,8 @@
       <xsl:variable name="file-name"
         select="concat(@xml:id, '.xml')" />
       <xsl:result-document
-        href="./data/source/parzival/splitted/{$file-name}">
-        <xsl:message><xsl:value-of select="concat('./data/source/parzival/splitted/',$file-name)"></xsl:value-of></xsl:message>
+        href="./data/source/heinrich/splitted/{$file-name}">
+        <xsl:message><xsl:value-of select="concat('./data/source/heinrich/splitted/',$file-name)"></xsl:value-of></xsl:message>
         <TEI xmlns="http://www.tei-c.org/ns/1.0">
           <xsl:apply-templates select="//tei:teiHeader" mode="header">
             <xsl:with-param name="wit-id" select="$wit-id" />
