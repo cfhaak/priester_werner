@@ -106,7 +106,7 @@
     I put that here for testing, should be removed in production.
     -->
     <exec executable="python">
-        <arg value="./pyscripts/make_snippets.py" />
+        <arg value="pyscripts/make_snippets.py" />
     </exec>
     <!-- 
     I put that here for testing, should be removed in production.

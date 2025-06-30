@@ -1,4 +1,4 @@
-const snippetLogPath = "./witness_snippets/snippet_paths.json";
+// const snippetLogPath = "./witness_snippets/snippet_paths.json";
 const INDIVIDUAL_SCROLL_CLASS = "individual-scroll-vertical";
 const GLOBAL_SCROLL_CLASS = "global-scroll-vertical";
 let default_global_scroll = false;
@@ -13,28 +13,41 @@ let witnessContainer;
 let displayEmtyLines = true;
 let displayLinenrGlobal = true;
 let displayLinenrLocal = false;
+let config = {};
 
-document.addEventListener("DOMContentLoaded", () => {
-  witnessContainer = document.getElementById("witness-container");
+async function loadConfig() {
+  try {
+    const response = await fetch("./js/column_viewer_config.json");
+    config = await response.json();
+    console.log(config)
+  } catch (error) {
+    console.error("Failed to load config:", error);
+  }
+}
+
+// Usage: Call loadConfig() before anything else in your DOMContentLoaded handler
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadConfig();
+  witnessContainer = document.getElementById(config.witnessContainerId);
   loadSnippetMetadata()
     .then((metadata) => {
       witness_metadata = metadata;
       sortedWitnessIds = sortWitnesIdsBySorting(metadata);
       populateColumns();
-      addButton("column-adder", "Add Column", addNewColumn);
-      addButton("scroll-toggler", "Toggle Scrolling", toggleScrollingBehaviour);
+      addButton(config.columnAdderId, "Add Column", addNewColumn);
+      addButton(config.scrollTogglerId, "Toggle Scrolling", toggleScrollingBehaviour);
       addButton(
-        "empty-line-toggler",
+        config.emptyLineTogglerId,
         "Toggle Empty Line Visibility",
         toggleEmptyLinesVisibility
       );
       addButton(
-        "global-linenr-toggler",
+        config.globalLinenrTogglerId,
         "Toggle Global Line Counter",
         toggleGlobalLinecounterVisibility
       );
       addButton(
-        "local-linenr-toggler",
+        config.localLinenrTogglerId,
         "Toggle Individual Line Counter",
         toggleLocalLinecounterVisibility
       );
@@ -62,11 +75,11 @@ async function fetchSnippet(filename) {
 
 async function loadSnippetMetadata() {
   try {
-    const response = await fetch(snippetLogPath);
+    const response = await fetch(config.snippetLogPath);
     return await response.json();
   } catch (error) {
     console.error(
-      `Error loading snippet metadata from ${snippetLogPath}:`,
+      `Error loading snippet metadata from ${config.snippetLogPath}:`,
       error
     );
     return {};
@@ -126,13 +139,13 @@ function createColumnHTML(columnId, witnessId) {
         </div>`;
 }
 
-function populateColumns(defaultColumnNumber = 4) {
+function populateColumns() {
   witnessContainer.innerHTML = "";
   if (!sortedWitnessIds.length) {
     console.error("No labels found in filepathsByLabels.");
     return;
   }
-  for (let i = 1; i <= defaultColumnNumber; i++) {
+  for (let i = 1; i <= config.defaultColumnNumber; i++) {
     columnCount++;
     const currentWitnessId = sortedWitnessIds[i - 1];
     if (currentWitnessId) createColumn(witnessContainer, i, currentWitnessId);

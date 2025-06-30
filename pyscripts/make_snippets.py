@@ -1,9 +1,8 @@
 import os
 import json
 from acdh_tei_pyutils.tei import TeiReader
-from saxonche import PySaxonProcessor
 import glob
-
+from saxonche import PySaxonProcessor
 
 ####################
 # vars

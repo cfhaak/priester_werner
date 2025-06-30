@@ -1,0 +1,17 @@
+{
+  "snippetLogPath": "./witness_snippets/snippet_paths.json",
+
+  "witnessContainerId": "witness-container",
+
+  "columnAdderId": "column-adder",
+
+  "scrollTogglerId": "scroll-toggler",
+
+  "emptyLineTogglerId": "empty-line-toggler",
+
+  "globalLinenrTogglerId": "global-linenr-toggler",
+
+  "localLinenrTogglerId": "local-linenr-toggler",
+
+  "defaultColumnNumber": 3
+}

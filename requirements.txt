@@ -1,6 +1,4 @@
 acdh-tei-pyutils
 acdh-cfts-pyutils
-jinja2
 saxonche
-collatex
-Levenshtein
+jinja2
