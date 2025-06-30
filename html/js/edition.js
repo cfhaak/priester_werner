@@ -20,10 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((metadata) => {
       witness_metadata = metadata;
       sortedWitnessIds = sortWitnesIdsBySorting(metadata);
-<<<<<<< HEAD
-=======
-      console.log(sortedWitnessIds);
->>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
       populateColumns();
       addButton("column-adder", "Add Column", addNewColumn);
       addButton("scroll-toggler", "Toggle Scrolling", toggleScrollingBehaviour);
@@ -94,9 +90,6 @@ function getSnippet(witnessId, callback) {
 }
 
 function generateDropdown(columnId, currentWitnessId) {
-  console.log(currentWitnessId);
-  console.log(sortedWitnessIds);
-  console.log(witness_metadata);
   return `
         <select class="text-select" onchange="updateColumn('${columnId}', null, this)">
             ${sortedWitnessIds
