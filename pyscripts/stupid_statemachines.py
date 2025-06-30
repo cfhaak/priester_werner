@@ -37,10 +37,14 @@ class Tag:
     # ([\w|data-]+)=[\"']?((?:.(?![\"']?\s+(?:\S+)=|\s*\/?[>\"']))+.)[\"']?
     # would have worked just fine, but state machines are fun! Especially if 
     # I created bugs, you’ll have to fix ;) have fun!!! fun!!! fun!!!
-    __pseudo_markup_sequence_opening_start = "<"
-    __pseudo_markup_sequence_opening_stop = "/>"
-    __pseudo_markup_sequence_closing_start = "<"
-    __pseudo_markup_sequence_closing_stop = "/>"
+    __tag_selfclosing_opening_start = "<"
+    __tag_selfclosing_opening_stop = "/>"
+    __tag_selfclosing_opening_start = __tag_selfclosing_opening_start
+    __tag_selfclosing_closing_stop = __tag_selfclosing_opening_stop
+    __tag_opening_start = __tag_selfclosing_opening_start
+    __tag_opening_stop = ">"
+    __tag_closing_start = "</"
+    __tag_closing_stop = ">"
     __temporary_id_attrib_name = "internalTIAN"
     
     def __init__(self, name: str="", attributes: dict = {}, text: str = ""):
@@ -57,7 +61,7 @@ class Tag:
             self.__attributes.append(attrib)
         self.children: list[Tag] = []
     
-    @classmethod
+    @staticmethod
     def get_app(sigil1:str, sigil2: str, rdg1:str, rdg2:str):
         tag = Tag("app")
         tag.add_child(
@@ -113,10 +117,30 @@ class Tag:
                     self.__attributes.append(attrib)
                     self.__attrib_name_open = True
 
+    def get_child_pseudo_markup(self, internal_tag_id: str):
+        internal_id_attrib = f"{self.__temporary_id_attrib_name}='{internal_tag_id}'"
+        if self.__text:
+            markup_start = f"{self.__tag_opening_start}{self.name} {internal_id_attrib} {self.get_attributes_string()} {self.__tag_opening_stop}"
+            markup_end = f"{self.__tag_closing_start}{self.name}{self.__tag_closing_stop}"
+            markup = f"{markup_start}{self.__text}{markup_end}"
+        else:
+            markup = f"{self.__tag_selfclosing_opening_start}{self.name} {internal_id_attrib} {self.get_attributes_string()} {self.__tag_selfclosing_opening_stop}"
+        return markup
+    
+    def get_pseudo_markup_for_children(self, internal_tag_id:str):
+        counter = 0
+        children_strings = []
+        for child in self.children:
+            counter += 1
+            children_strings.append(
+                child.get_child_pseudo_markup(f"{internal_tag_id}_{counter}")
+            )
+        return "".join(children_strings)
+    
     def get_pseudo_markup(self, internal_tag_id: str) -> tuple[str, str]:
         internal_id_attrib = f"{self.__temporary_id_attrib_name}='{internal_tag_id}'"
-        opening = f"{self.__pseudo_markup_sequence_opening_start}{self.name} {internal_id_attrib} {self.get_attributes_string()} {self.__pseudo_markup_sequence_opening_stop}"
-        closing = f"{self.__pseudo_markup_sequence_closing_start}{self.name} {internal_id_attrib} {self.__pseudo_markup_sequence_closing_stop}"
+        opening = f"{self.__tag_selfclosing_opening_start}{self.name} {internal_id_attrib} {self.get_attributes_string()} {self.__tag_selfclosing_opening_stop}{self.get_pseudo_markup_for_children(internal_tag_id)}"
+        closing = f"{self.__tag_selfclosing_opening_start}{self.name} {internal_id_attrib} {self.__tag_selfclosing_closing_stop}"
         return (opening, closing)
         
     def get_attributes_string(self):

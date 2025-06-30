@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSnippetMetadata()
     .then((metadata) => {
       witness_metadata = metadata;
-      sortedWitnessIds = sortWitnesIdsBySorting(metadata);  
+      sortedWitnessIds = sortWitnesIdsBySorting(metadata);
       populateColumns();
       addButton("column-adder", "Add Column", addNewColumn);
       addButton("scroll-toggler", "Toggle Scrolling", toggleScrollingBehaviour);

@@ -202,7 +202,9 @@ class Textchunck:
                 insert_before_index <= insert_closing_after_index
             ), "The insert_closing_after_index value '{insert_closing_after_index}' is to small to tag anything."
             self.insert_opening_tag(opening, insert_before_index)
-            self.insert_closing_tag(closing, insert_closing_after_index - 1)
+            # self.insert_closing_tag(closing, insert_closing_after_index)
+            # index = insert_closing_after_index -1 + len(opening)
+            # self.insert_closing_tag(closing, index)
         if log:
             offset = 20
             input(
