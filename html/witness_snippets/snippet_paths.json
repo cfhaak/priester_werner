@@ -1,1 +1,52 @@
-{"Cod._St._Peter_perg._71":{"id":"Cod._St._Peter_perg._71","title":"Driu liet von der magd, Handschrift C","filepath":".\/witness_snippets\/probe_C.html","sorting":"C"},"Cod._2742*":{"id":"Cod._2742*","title":"Driu liet von der magd, Handschrift A","filepath":".\/witness_snippets\/probe_A.html","sorting":"A"},"Berol._mgo_109":{"id":"Berol._mgo_109","title":"Driu liet von der magd, Handschrift D","filepath":".\/witness_snippets\/probe_D.html","sorting":"D"},"Fragm._germ._9":{"id":"Fragm._germ._9","title":"Driu liet von der magd, Handschrift F","filepath":".\/witness_snippets\/probe_F.html","sorting":"F"}}
+{
+    "tr_Bb": {
+        "filepath": "witness_snippets/tr_Bb.snpt",
+        "sorting": "tr_Bb",
+        "title": "Der arme Heinrich tr_Bb"
+    },
+    "F": {
+        "filepath": "witness_snippets/F.snpt",
+        "sorting": "F",
+        "title": "Der arme Heinrich F"
+    },
+    "A": {
+        "filepath": "witness_snippets/A.snpt",
+        "sorting": "A",
+        "title": "Der arme Heinrich A"
+    },
+    "Bb": {
+        "filepath": "witness_snippets/Bb.snpt",
+        "sorting": "Bb",
+        "title": "Der arme Heinrich Bb"
+    },
+    "C": {
+        "filepath": "witness_snippets/C.snpt",
+        "sorting": "C",
+        "title": "Der arme Heinrich C"
+    },
+    "Ba": {
+        "filepath": "witness_snippets/Ba.snpt",
+        "sorting": "Ba",
+        "title": "Der arme Heinrich Ba"
+    },
+    "E": {
+        "filepath": "witness_snippets/E.snpt",
+        "sorting": "E",
+        "title": "Der arme Heinrich E"
+    },
+    "D": {
+        "filepath": "witness_snippets/D.snpt",
+        "sorting": "D",
+        "title": "Der arme Heinrich D"
+    },
+    "tr_Ba": {
+        "filepath": "witness_snippets/tr_Ba.snpt",
+        "sorting": "tr_Ba",
+        "title": "Der arme Heinrich tr_Ba"
+    },
+    "tr_A": {
+        "filepath": "witness_snippets/tr_A.snpt",
+        "sorting": "tr_A",
+        "title": "Der arme Heinrich tr_A"
+    }
+}

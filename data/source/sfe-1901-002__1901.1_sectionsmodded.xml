@@ -422,7 +422,11 @@
             <p>„<quote type="inlinequote">Nun ist die Luft von solchem Spuk so voll,<lb/> Dass
                niemand weiss, wie er ihn meiden soll.</quote>“<lb/> Faust, II. T., V. Akt<lb break="paragraph"/></p>
             <div rendition="#h1" type="section" section_id="id_1">
+<<<<<<< HEAD
 <app internalTIAN="witness_1_00001"/><rdg internalTIAN="witness_1_00001_1" wit="witness_2"> </rdg><rdg internalTIAN="witness_1_00001_2" wit="witness_1"/>               <title>I.<lb break="paragraph"/></title>
+=======
+<rdg internalTIAN="witness_1_00001" w1_has=""/><rdg internalTIAN="witness_1_00001"/>               <title>I.<lb break="paragraph"/></title>
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
             <p rendition="#h1">
                <title>Vergessen von Eigennamen.<lb break="paragraph"/></title>
             </p>
@@ -433,7 +437,11 @@
                Eigennamen an einem praegnanten Beispiel aus meiner Selbst<lb break="no"/>beobachtung
                der psychologischen Analyse unterzogen und bin<lb/> zum Ergebnis gelangt, dass
                dieser gewöhnliche und praktisch<lb/> nicht sehr bedeutsame Einzelvorfall von
+<<<<<<< HEAD
                Versagen einer psvchi<lb break="no"/>schen <app internalTIAN="witness_1_00002"/><rdg internalTIAN="witness_1_00002_1" wit="witness_1">Funktion </rdg><rdg internalTIAN="witness_1_00002_2" wit="witness_2">Function </rdg>Funktion — des Erinnerns — eine
+=======
+               Versagen einer psvchi<lb break="no"/>schen<rdg internalTIAN="witness_1_00002" w2_has="Function"/><rdg internalTIAN="witness_1_00002"/> Funktion — des Erinnerns — eine
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
                Aufklärung zulässt,<lb/> welche weit über die gebräuchliche Verwertung des Phänomens<lb/>
                hinausführt.<lb break="paragraph"/></p>
             <p>Wenn ich nicht sehr irre, würde ein Psycholog, von dem<lb/> man die Erklärung
@@ -449,9 +457,13 @@
                   erinnert</hi>. Dem sich um den entfallenen Namen<lb/> Bemühenden kommen andere — <hi rendition="#smallcaps">Ersatznamen</hi> — zum Be<lb break="no"/>wusstsein, die
                zwar sofort als unrichtig erkannt werden, sich<lb/> aber doch mit grosser Zähigkeit
                immer wieder aufdrängen. Der<lb break="paragraph"/><pb n="2" xml:id="page__b5753176-dddf-4ad0-9d36-f3be7b866f6e"/><fw type="pageNum">2</fw>Vorgang,
+<<<<<<< HEAD
                der zur <app internalTIAN="witness_1_00003"> <rdg internalTIAN="witness_1_00003_1" wit="witness_1">Reproduktion </rdg>
                   <rdg internalTIAN="witness_1_00003_2" wit="witness_2">Reproduction </rdg></app>
                Reproduktion  des gesuchten Namens führen<lb/> soll, hat sich gleichsam <hi rendition="#smallcaps">verschoben</hi> und so zu einem unrich<lb break="no"/>tigen Ersatz geführt. Meine Voraussetzung ist nun, dass diese<lb/>
+=======
+               der zur<rdg internalTIAN="witness_1_00003" w2_has="Reproduction"/><rdg internalTIAN="witness_1_00003"/> Reproduktion des gesuchten Namens führen<lb/> soll, hat sich gleichsam <hi rendition="#smallcaps">verschoben</hi> und so zu einem unrich<lb break="no"/>tigen Ersatz geführt. Meine Voraussetzung ist nun, dass diese<lb/>
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
                Verschiebung nicht psychischer Willkür überlassen ist, sondern<lb/> gesetzmässige
                und berechenbare Bahnen einhält. Mit anderen<lb/> Worten, ich vermute, dass der oder
                die Ersatznamen in einem<lb/> aufspürbaren Zusammenhang mit dem gesuchten Namen
@@ -467,7 +479,11 @@
                entschieden als unrichtig abwies. Als mir der<lb/> richtige Name von fremder Seite
                mitgeteilt wurde, erkannte ich<lb/> ihn sogleich und ohne Schwanken. Die
                Untersuchung, durch<lb/> welche Einflüsse und auf welchen Associationswegen sich die<lb/>
+<<<<<<< HEAD
                <app internalTIAN="witness_1_00004"/><rdg internalTIAN="witness_1_00004_1" wit="witness_1">Reproduktion </rdg><rdg internalTIAN="witness_1_00004_2" wit="witness_2">Reproduction </rdg>Reproduktion in solcher Weise — von <hi rendition="#smallcaps">Signorelli</hi> auf <hi rendition="#smallcaps">Botti</hi><lb break="no"/><hi rendition="#smallcaps">celli</hi> und <hi rendition="#smallcaps">Boltraffio</hi> —
+=======
+<rdg internalTIAN="witness_1_00004" w2_has="Reproduction"/><rdg internalTIAN="witness_1_00004"/>               Reproduktion in solcher Weise — von <hi rendition="#smallcaps">Signorelli</hi> auf <hi rendition="#smallcaps">Botti</hi><lb break="no"/><hi rendition="#smallcaps">celli</hi> und <hi rendition="#smallcaps">Boltraffio</hi> —
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
                verschoben hatte, führte zu folgenden<lb/> Ergebnissen:<lb break="paragraph"/></p>
             <p>a) Der Grund für das Entfallen des Namens <hi rendition="#smallcaps">Signorelli</hi><lb/>
                ist weder in einer Besonderheit dieses Namens selbst noch in<lb/> einem
@@ -475,7 +491,11 @@
                eingefügt war. Der vergessene Name war<lb/> mir ebenso vertraut wie der eine der
                Ersatznamen — Botticelli<lb/> — und ungleich vertrauter als der andere der
                Ersatznamen —<lb/> Boltraffio —, von dessen Träger ich kaum etwas anderes anzu<lb break="no"/>geben wüsste als seine Zugehörigkeit zur mailändischen Schule.<lb/>
+<<<<<<< HEAD
                Der Zusamme<app internalTIAN="witness_1_00003"/>nhang aber, in dem sich das Namenvergessen er<lb break="no"/>eignete,
+=======
+               Der Zusammenhang aber, in dem sich das Namenvergessen er<lb break="no"/>eignete,
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
                erscheint mir harmlos und führt zu keiner weiteren<lb/> Aufklärung: Ich machte mit
                einem Fremden eine Wagenfahrt<lb/> von Ragusa in Dalmatien nach einer Station der
                Hercegowina;<lb/> wir kamen auf das Reisen in Italien zu sprechen, und ich fragte<lb/>
@@ -554,7 +574,11 @@
                Silbenpaar ist in einem der Ersatznamen unverändert<lb/> wiedergekehrt (<hi rendition="#smallcaps">elli</hi>), das andere hat durch die Uebersetzung<lb/>
                <hi rendition="#smallcaps">Signor — Herr</hi> mehrfache und verschiedenartige
                Beziehungen zu<lb/> den im verdrängten Thema enthaltenen Namen gewonnen, ist<lb/>
+<<<<<<< HEAD
                aber dadurch für die <app internalTIAN="witness_1_00005"/><rdg internalTIAN="witness_1_00005_1" wit="witness_1">Reproduktion </rdg><rdg internalTIAN="witness_1_00005_2" wit="witness_2">Reproduction </rdg>Reproduktion verloren gegangen. Sein<lb/> Ersatz hat so
+=======
+               aber dadurch für die<rdg internalTIAN="witness_1_00005" w2_has="Reproduction"/><rdg internalTIAN="witness_1_00005"/> Reproduktion verloren gegangen. Sein<lb/> Ersatz hat so
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
                stattgefunden, als ob eine Verschiebung längs der<lb/> Namenverbindung „<hi rendition="#smallcaps">Herc</hi>egowina und <hi rendition="#smallcaps">Bos</hi>nien“
                vorgenommen<lb/> worden wäre, ohne Rücksicht auf den Sinn und auf die acustische<lb/>
                Abgrenzung der Silben zu nehmen. Die Namen sind also bei<lb/> diesem Vorgang ähnlich
@@ -575,7 +599,11 @@
                können, noch ein <hi rendition="#smallcaps">Motiv</hi> hinzugefügt,<lb/> und
                überdies den Mechanismus des Fehlerinnerns klar gelegt.<lb/> Jene Dispositionen sind
                auch für unseren Fall unentbehrlich,<lb/> um die Möglichkeit zu schaffen, dass das
+<<<<<<< HEAD
                ver<app internalTIAN="witness_1_00006"/><rdg internalTIAN="witness_1_00006_1" wit="witness_1">Reproduktionsbedingungen </rdg><rdg internalTIAN="witness_1_00006_2" wit="witness_2">Reproductionsbedingungen </rdg>drängte Element<lb/> sich associativ des gesuchten Namens bemächtige und es mit<lb/>
+=======
+               verdrängte Element<lb/> sich associativ des gesuchten Namens bemächtige und es <rdg internalTIAN="witness_1_00006" w2_has="Reproductionsbedingungen"/><rdg internalTIAN="witness_1_00006"/>mit<lb/>
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
                sich in die Verdrängung nehme. Bei einem anderen Namen mit<lb/> günstigeren
                Reproduktionsbedingungen wäre dies vielleicht nicht<lb/> geschehen. Es ist ja
                wahrscheinlich, dass ein unterdrücktes<lb/> Element allemal bestrebt ist, sich
@@ -595,10 +623,17 @@
                Frage ist es, ob eine solche<lb/> äusserliche Association wirklich die genügende
                Bedingung dafür<lb/> sein kann, dass das verdrängte Element die Reproduction des<lb/>
                gesuchten Namens störe, ob nicht doch notwendig ein intimerer<lb/> Zusammenhang der
+<<<<<<< HEAD
         <app internalTIAN="witness_1_00007"/><rdg internalTIAN="witness_1_00007_1" wit="witness_2">: </rdg><rdg internalTIAN="witness_1_00007_2" wit="witness_1"/>       beiden Themata erforderlich wird. Bei ober<lb break="no"/>flächlicher Betrachtung
                würde man letztere Forderung abweisen<lb/> wollen und das zeitliche
                Aneinanderstossen bei völlig dis<lb break="no"/>paratem Inhalt für genügend halten.
                Bei eingehender Unter<lb break="no"/>suchung findet man aber immer häufiger, dass
+=======
+               beiden Themata erforderlich wird. Bei ober<lb break="no"/>flächlicher Betrachtung
+               würde man letztere Forderung abweisen<lb/> wollen und das zeitliche
+               Aneinanderstossen bei völlig dis<lb break="no"/>paratem Inhalt für genügend halten.
+              <rdg internalTIAN="witness_1_00007" w1_has=":"/><rdg internalTIAN="witness_1_00007"/> Bei eingehender Unter<lb break="no"/>suchung findet man aber immer häufiger, dass
+>>>>>>> 7c9304bc6236771011878962b2fb7ae024dc23bd
                die beiden durch<lb/> eine äusserliche Association verknüpften Elemente (das
                verdrängte<lb/> und das neue) ausserdem einen inhaltlichen Zusammenhang be<lb break="no"/>sitzen, und auch in dem Beispiel: <hi rendition="#smallcaps">
                Signorelli</hi> lässt sich ein<lb/> solcher erweisen.<lb break="paragraph"/></p>
