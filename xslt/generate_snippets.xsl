@@ -13,11 +13,6 @@
             <xsl:apply-templates/>
         </span>
     </xsl:template>
-    <xsl:template match="tei:choice">
-        <span class="choice">
-            <xsl:apply-templates/>
-        </span>
-    </xsl:template>
     <xsl:template match="tei:unclear">
         <span class="unclear">
             <xsl:apply-templates/>
@@ -30,12 +25,6 @@
     </xsl:template>
     <xsl:template match="tei:add">
         <span class="del">
-            <xsl:apply-templates/>
-        </span>
-    </xsl:template>
-
-    <xsl:template match="tei:am">
-        <span class="am">
             <xsl:apply-templates/>
         </span>
     </xsl:template>
@@ -121,13 +110,29 @@
             <xsl:apply-templates/>
         </p>
     </xsl:template>
-    <xsl:template match="//tei:choice[tei:orig]">
+    <!-- <xsl:template match="tei:choice">
+        <span class="choice">
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template> -->
+    <xsl:template match="//tei:choice">
         <xsl:apply-templates/>
     </xsl:template>
     <xsl:template match="tei:orig">
         <xsl:apply-templates/>
     </xsl:template>
     <xsl:template match="tei:reg">
+    </xsl:template>
+    <xsl:template match="tei:abbr">
+        <xsl:apply-templates/>
+    </xsl:template>
+    <xsl:template match="tei:expan">
+    </xsl:template>
+
+    <xsl:template match="tei:am">
+        <!-- <span class="am"> -->
+            <xsl:apply-templates/>
+        <!-- </span> -->
     </xsl:template>
     <!-- Abstract template for lines -->
     <xsl:template name="render-line">
