@@ -29,6 +29,7 @@ class ColumnViewerConfig {
   controls_container_class = "controls-container";
   dropdown_class = "witness-dropdown";
   remove_column_button_class = "remove-column-button";
+  dropdown_class = "text-select";
 }
 
 export default ColumnViewerConfig;

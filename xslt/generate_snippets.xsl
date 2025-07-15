@@ -140,7 +140,7 @@
         <xsl:param name="linenr-global" />
         <xsl:param name="linenr-own" />
 
-        <span class="witness-line {$class}" data-n="{$linenr-global}" id="{$linenr-global}" ondblclick="handleDoubleClick(event, '{$linenr-global}')">
+        <span class="witness-line {$class}" data-n="{$linenr-global}" id="{$linenr-global}">
             <span class="linenr-global">
                 <xsl:value-of select="$linenr-global" />
                     &#160;&#160;

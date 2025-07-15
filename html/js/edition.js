@@ -1,4 +1,4 @@
-import ColumnViewerConfig from './column_viewer_config.js';
+import ColumnViewerConfig from "./column_viewer_config.js";
 let default_global_scroll = false;
 let global_scroll = default_global_scroll;
 let existingColumns = [];
@@ -17,8 +17,6 @@ async function loadConfig() {
   config = new ColumnViewerConfig();
 }
 
-
-// Usage: Call loadConfig() before anything else in your DOMContentLoaded handler
 document.addEventListener("DOMContentLoaded", async () => {
   await loadConfig();
   witnessContainer = document.getElementById(config.witnessContainerId);
@@ -27,8 +25,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       witness_metadata = metadata;
       sortedWitnessIds = sortWitnessIdsBySorting(metadata);
       populateColumns();
+      addLineClickListener();
+      addDropdownChangeListener();
+      addRemoveColumnListener();
       addButton(config.columnAdderId, "Add Column", addNewColumn);
-      addButton(config.scrollTogglerId, "Toggle Scrolling", toggleScrollingBehaviour);
+      addButton(
+        config.scrollTogglerId,
+        "Toggle Scrolling",
+        toggleScrollingBehaviour
+      );
       addButton(
         config.emptyLineTogglerId,
         "Toggle Empty Line Visibility",
@@ -47,6 +52,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
     .catch((error) => console.error("Failed to load snippet metadata:", error));
 });
+
+function addRemoveColumnListener() {
+  witnessContainer.addEventListener("click", function (event) {
+    if (event.target.matches(`.${config.remove_column_button_class}`)) {
+      const columnId = event.target.closest(`.${config.witness_class}`).id;
+      removeColumn(columnId);
+    }
+  });
+}
+
+function addDropdownChangeListener() {
+  witnessContainer.addEventListener("change", function (event) {
+    if (event.target.matches(`.${config.dropdown_class}`)) {
+      const columnId = event.target.getAttribute("data-column-id");
+      updateColumn(columnId, null, event.target);
+    }
+  });
+}
+
+function addLineClickListener() {
+  witnessContainer.addEventListener("dblclick", function (event) {
+    console.log("Double-click detected on witness line.");
+    // Find the closest .witness-line element
+    const line = event.target.closest(`.${config.witness_line_class}`);
+    if (line && witnessContainer.contains(line)) {
+      // Use the global line number as the spanId
+      const spanId = line.getAttribute("id");
+      handleDoubleClick(event, spanId);
+    }
+  });
+}
 
 function sortWitnessIdsBySorting(metadata) {
   return Object.entries(metadata)
@@ -97,16 +133,16 @@ function getSnippet(witnessId, callback) {
 
 function generateDropdown(columnId, currentWitnessId) {
   return `
-        <select class="text-select" onchange="updateColumn('${columnId}', null, this)">
-            ${sortedWitnessIds
-              .map(
-                (witnessId) =>
-                  `<option value="${witnessId}" ${
-                    witnessId === currentWitnessId ? "selected" : ""
-                  }>${witness_metadata[witnessId].title}</option>`
-              )
-              .join("")}
-        </select>`;
+    <select class="${config.dropdown_class}" data-column-id="${columnId}">
+      ${sortedWitnessIds
+        .map(
+          (witnessId) =>
+            `<option value="${witnessId}" ${
+              witnessId === currentWitnessId ? "selected" : ""
+            }>${witness_metadata[witnessId].title}</option>`
+        )
+        .join("")}
+    </select>`;
 }
 
 function removeColumn(columnId) {
@@ -119,12 +155,16 @@ function removeColumn(columnId) {
 
 function createColumnHTML(columnId, witnessId) {
   const cssClass =
-    global_scroll === true ? config.GLOBAL_SCROLL_CLASS : config.INDIVIDUAL_SCROLL_CLASS;
+    global_scroll === true
+      ? config.GLOBAL_SCROLL_CLASS
+      : config.INDIVIDUAL_SCROLL_CLASS;
   return `
         <div id="${columnId}" class="${config.witness_class} ${cssClass}">
             <div class="${config.controls_container_class}">
                 ${generateDropdown(columnId, witnessId)}
-                <button class="${config.remove_column_button_class}" onclick="removeColumn('${columnId}')" title="Remove Column">&times;</button>
+                <button class="${
+                  config.remove_column_button_class
+                }"title="Remove Column">&times;</button>
             </div>
             <div class="${config.text_content_class} ${cssClass}">${
     witness_metadata[witnessId].title || "Error while loading."
@@ -153,9 +193,11 @@ function createColumn(container, columnIndex, witnessId) {
 }
 
 function updateColumn(columnId, snippet, selectElement = null) {
+  console.log(`Updating column: ${columnId}`);
   const columnElement = document.getElementById(columnId);
-  const textContentElement = columnElement.querySelector(`.${config.text_content_class}`);
-
+  const textContentElement = columnElement.querySelector(
+    `.${config.text_content_class}`
+  );
   // If a selectElement is provided, fetch the snippet
   if (selectElement) {
     getSnippet(selectElement.value, (fetchedSnippet) => {
@@ -191,7 +233,9 @@ function addButton(containerId, text, onClick) {
 }
 
 function toggleScrollingBehaviour() {
-  const text_contents = document.getElementsByClassName(config.text_content_class);
+  const text_contents = document.getElementsByClassName(
+    config.text_content_class
+  );
   const witnesses = document.getElementsByClassName(config.witness_class);
   for (const text_content of text_contents) {
     toggleScrollClass(text_content);
@@ -210,22 +254,30 @@ function toggleScrollClass(element) {
 }
 
 function setEmptyLinesVisibility(textContentElement) {
-  textContentElement.querySelectorAll(`.${config.witness_line_class}.${config.omitted_line_class}`).forEach((line) => {
-    line.classList.toggle(config.hidden_element_class, !displayEmtyLines);
-  });
+  textContentElement
+    .querySelectorAll(
+      `.${config.witness_line_class}.${config.omitted_line_class}`
+    )
+    .forEach((line) => {
+      line.classList.toggle(config.hidden_element_class, !displayEmtyLines);
+    });
 }
 
 function toggleEmptyLinesVisibility() {
   document
-    .querySelectorAll(`.${config.witness_line_class}.${config.omitted_line_class}`)
+    .querySelectorAll(
+      `.${config.witness_line_class}.${config.omitted_line_class}`
+    )
     .forEach((line) => line.classList.toggle(config.hidden_element_class));
   displayEmtyLines = !displayEmtyLines;
 }
 
 function setGlobalLinecounterVisibility(textContentElement) {
-  textContentElement.querySelectorAll(`.${config.global_line_counter_class}`).forEach((line) => {
-    line.classList.toggle(config.hidden_element_class, !displayLinenrGlobal);
-  });
+  textContentElement
+    .querySelectorAll(`.${config.global_line_counter_class}`)
+    .forEach((line) => {
+      line.classList.toggle(config.hidden_element_class, !displayLinenrGlobal);
+    });
 }
 
 function toggleGlobalLinecounterVisibility() {
@@ -236,9 +288,11 @@ function toggleGlobalLinecounterVisibility() {
 }
 
 function setLocalLinecounterVisibility(textContentElement) {
-  textContentElement.querySelectorAll(`.${config.local_line_counter_class}`).forEach((line) => {
-    line.classList.toggle(config.hidden_element_class, !displayLinenrLocal);
-  });
+  textContentElement
+    .querySelectorAll(`.${config.local_line_counter_class}`)
+    .forEach((line) => {
+      line.classList.toggle(config.hidden_element_class, !displayLinenrLocal);
+    });
 }
 
 function toggleLocalLinecounterVisibility() {
@@ -250,10 +304,14 @@ function toggleLocalLinecounterVisibility() {
 
 function handleDoubleClick(event, spanId) {
   // Remove existing highlights
-  document.querySelectorAll(`.${config.text_content_class} span.${config.highlight_class}`).forEach((span) => {
-    span.classList.remove(config.highlight_class);
-    span.classList.remove(config.neigh_class);
-  });
+  document
+    .querySelectorAll(
+      `.${config.text_content_class} span.${config.highlight_class}`
+    )
+    .forEach((span) => {
+      span.classList.remove(config.highlight_class);
+      span.classList.remove(config.neigh_class);
+    });
 
   // Highlight all spans with the same ID
   const matchingSpans = document.querySelectorAll(
@@ -261,7 +319,11 @@ function handleDoubleClick(event, spanId) {
   );
   let highlitedSpans = [];
   matchingSpans.forEach((matchingSpan) => {
-    if (!matchingSpan.matches(`.${config.omitted_line_class}.${config.hidden_element_class}`)) {
+    if (
+      !matchingSpan.matches(
+        `.${config.omitted_line_class}.${config.hidden_element_class}`
+      )
+    ) {
       matchingSpan.classList.add(config.highlight_class);
       // Scroll the span into view if it's visible
       matchingSpan.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -286,7 +348,9 @@ function handleDoubleClick(event, spanId) {
     "click",
     (e) => {
       // Check if the click is outside the highlighted spans
-      if (!e.target.closest(`.${config.text_content_class} span[id="${spanId}"]`)) {
+      if (
+        !e.target.closest(`.${config.text_content_class} span[id="${spanId}"]`)
+      ) {
         highlitedSpans.forEach((highlitedSpan) => {
           highlitedSpan.classList.remove(config.highlight_class);
           highlitedSpan.classList.remove(config.neigh_class);
@@ -301,7 +365,11 @@ function handleDoubleClick(event, spanId) {
 function findPreviousVisibleSibling(element) {
   let sibling = element.previousElementSibling;
   while (sibling) {
-    if (!sibling.matches(`.${config.omitted_line_class}.${config.hidden_element_class}`)) {
+    if (
+      !sibling.matches(
+        `.${config.omitted_line_class}.${config.hidden_element_class}`
+      )
+    ) {
       return sibling;
     }
     sibling = sibling.previousElementSibling;
