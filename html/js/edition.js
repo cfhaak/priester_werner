@@ -1,6 +1,3 @@
-// const snippetLogPath = "./witness_snippets/snippet_paths.json";
-const INDIVIDUAL_SCROLL_CLASS = "individual-scroll-vertical";
-const GLOBAL_SCROLL_CLASS = "global-scroll-vertical";
 let default_global_scroll = false;
 let global_scroll = default_global_scroll;
 let existingColumns = [];
@@ -19,7 +16,6 @@ async function loadConfig() {
   try {
     const response = await fetch("./js/column_viewer_config.json");
     config = await response.json();
-    console.log(config)
   } catch (error) {
     console.error("Failed to load config:", error);
   }
@@ -32,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadSnippetMetadata()
     .then((metadata) => {
       witness_metadata = metadata;
-      sortedWitnessIds = sortWitnesIdsBySorting(metadata);
+      sortedWitnessIds = sortWitnessIdsBySorting(metadata);
       populateColumns();
       addButton(config.columnAdderId, "Add Column", addNewColumn);
       addButton(config.scrollTogglerId, "Toggle Scrolling", toggleScrollingBehaviour);
@@ -55,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .catch((error) => console.error("Failed to load snippet metadata:", error));
 });
 
-function sortWitnesIdsBySorting(metadata) {
+function sortWitnessIdsBySorting(metadata) {
   return Object.entries(metadata)
     .sort((a, b) => a[1].sorting.localeCompare(b[1].sorting))
     .map(([key]) => key);
@@ -126,14 +122,14 @@ function removeColumn(columnId) {
 
 function createColumnHTML(columnId, witnessId) {
   const cssClass =
-    global_scroll === true ? GLOBAL_SCROLL_CLASS : INDIVIDUAL_SCROLL_CLASS;
+    global_scroll === true ? config.GLOBAL_SCROLL_CLASS : config.INDIVIDUAL_SCROLL_CLASS;
   return `
-        <div id="${columnId}" class="witness ${cssClass}">
-            <div class="controls-container">
+        <div id="${columnId}" class="${config.witness_class} ${cssClass}">
+            <div class="${config.controls_container_class}">
                 ${generateDropdown(columnId, witnessId)}
-                <button class="remove-column-button" onclick="removeColumn('${columnId}')" title="Remove Column">&times;</button>
+                <button class="${config.remove_column_button_class}" onclick="removeColumn('${columnId}')" title="Remove Column">&times;</button>
             </div>
-            <div class="text-content ${cssClass}">${
+            <div class="${config.text_content_class} ${cssClass}">${
     witness_metadata[witnessId].title || "Error while loading."
   }</div>
         </div>`;
@@ -153,7 +149,7 @@ function populateColumns() {
 }
 
 function createColumn(container, columnIndex, witnessId) {
-  const columnId = `witness_column_${String(columnIndex).padStart(2, "0")}`;
+  const columnId = `Witness_column_${String(columnIndex).padStart(2, "0")}`;
   container.innerHTML += createColumnHTML(columnId, witnessId);
   if (!existingColumns.includes(columnId)) existingColumns.push(columnId);
   getSnippet(witnessId, (snippet) => updateColumn(columnId, snippet, null));
@@ -161,7 +157,7 @@ function createColumn(container, columnIndex, witnessId) {
 
 function updateColumn(columnId, snippet, selectElement = null) {
   const columnElement = document.getElementById(columnId);
-  const textContentElement = columnElement.querySelector(".text-content");
+  const textContentElement = columnElement.querySelector(`.${config.text_content_class}`);
 
   // If a selectElement is provided, fetch the snippet
   if (selectElement) {
@@ -198,8 +194,8 @@ function addButton(containerId, text, onClick) {
 }
 
 function toggleScrollingBehaviour() {
-  const text_contents = document.getElementsByClassName("text-content");
-  const witnesses = document.getElementsByClassName("witness");
+  const text_contents = document.getElementsByClassName(config.text_content_class);
+  const witnesses = document.getElementsByClassName(config.witness_class);
   for (const text_content of text_contents) {
     toggleScrollClass(text_content);
   }
@@ -211,65 +207,65 @@ function toggleScrollingBehaviour() {
 
 function toggleScrollClass(element) {
   if (element) {
-    element.classList.toggle(INDIVIDUAL_SCROLL_CLASS);
-    element.classList.toggle(GLOBAL_SCROLL_CLASS);
+    element.classList.toggle(config.INDIVIDUAL_SCROLL_CLASS);
+    element.classList.toggle(config.GLOBAL_SCROLL_CLASS);
   }
 }
 
 function setEmptyLinesVisibility(textContentElement) {
-  textContentElement.querySelectorAll(".witness-line.om").forEach((line) => {
-    line.classList.toggle("hidden", !displayEmtyLines);
+  textContentElement.querySelectorAll(`.${config.witness_line_class}.${config.omitted_line_class}`).forEach((line) => {
+    line.classList.toggle(config.hidden_element_class, !displayEmtyLines);
   });
 }
 
 function toggleEmptyLinesVisibility() {
   document
-    .querySelectorAll(".witness-line.om")
-    .forEach((line) => line.classList.toggle("hidden"));
+    .querySelectorAll(`.${config.witness_line_class}.${config.omitted_line_class}`)
+    .forEach((line) => line.classList.toggle(config.hidden_element_class));
   displayEmtyLines = !displayEmtyLines;
 }
 
 function setGlobalLinecounterVisibility(textContentElement) {
-  textContentElement.querySelectorAll(".linenr-global").forEach((line) => {
-    line.classList.toggle("hidden", !displayLinenrGlobal);
+  textContentElement.querySelectorAll(`.${config.global_line_counter_class}`).forEach((line) => {
+    line.classList.toggle(config.hidden_element_class, !displayLinenrGlobal);
   });
 }
 
 function toggleGlobalLinecounterVisibility() {
   document
-    .querySelectorAll(".linenr-global")
-    .forEach((line) => line.classList.toggle("hidden"));
+    .querySelectorAll(`.${config.global_line_counter_class}`)
+    .forEach((line) => line.classList.toggle(config.hidden_element_class));
   displayLinenrGlobal = !displayLinenrGlobal;
 }
 
 function setLocalLinecounterVisibility(textContentElement) {
-  textContentElement.querySelectorAll(".linenr_own").forEach((line) => {
-    line.classList.toggle("hidden", !displayLinenrLocal);
+  textContentElement.querySelectorAll(`.${config.local_line_counter_class}`).forEach((line) => {
+    line.classList.toggle(config.hidden_element_class, !displayLinenrLocal);
   });
 }
 
 function toggleLocalLinecounterVisibility() {
   document
-    .querySelectorAll(".linenr_own")
-    .forEach((line) => line.classList.toggle("hidden"));
+    .querySelectorAll(`.${config.local_line_counter_class}`)
+    .forEach((line) => line.classList.toggle(config.hidden_element_class));
   displayLinenrLocal = !displayLinenrLocal;
 }
 
 function handleDoubleClick(event, spanId) {
   // Remove existing highlights
-  document.querySelectorAll(".text-content span.highlight").forEach((span) => {
-    span.classList.remove("highlight");
-    span.classList.remove("neigh");
+  document.querySelectorAll(`.${config.text_content_class} span.${config.highlight_class}`).forEach((span) => {
+    span.classList.remove(config.highlight_class);
+    span.classList.remove(config.neigh_class);
   });
 
   // Highlight all spans with the same ID
   const matchingSpans = document.querySelectorAll(
-    `.text-content span[id="${spanId}"]`
+    `.${config.text_content_class} span[id="${spanId}"]`
   );
   let highlitedSpans = [];
   matchingSpans.forEach((matchingSpan) => {
-    if (!matchingSpan.matches(".om.hidden")) {
-      matchingSpan.classList.add("highlight");
+    if (!matchingSpan.matches(`.${config.omitted_line_class}.${config.hidden_element_class}`)) {
+      matchingSpan.classList.add(config.highlight_class);
       // Scroll the span into view if it's visible
       matchingSpan.scrollIntoView({ behavior: "smooth", block: "center" });
       highlitedSpans.push(matchingSpan);
@@ -277,8 +273,8 @@ function handleDoubleClick(event, spanId) {
       // Find the next visible sibling and scroll to it
       const previousVisibleSibling = findPreviousVisibleSibling(matchingSpan);
       if (previousVisibleSibling) {
-        previousVisibleSibling.classList.add("highlight");
-        previousVisibleSibling.classList.add("neigh");
+        previousVisibleSibling.classList.add(config.highlight_class);
+        previousVisibleSibling.classList.add(config.neigh_class);
         previousVisibleSibling.scrollIntoView({
           behavior: "smooth",
           block: "center",
@@ -293,10 +289,10 @@ function handleDoubleClick(event, spanId) {
     "click",
     (e) => {
       // Check if the click is outside the highlighted spans
-      if (!e.target.closest(`.text-content span[id="${spanId}"]`)) {
+      if (!e.target.closest(`.${config.text_content_class} span[id="${spanId}"]`)) {
         highlitedSpans.forEach((highlitedSpan) => {
-          highlitedSpan.classList.remove("highlight");
-          highlitedSpan.classList.remove("neigh");
+          highlitedSpan.classList.remove(config.highlight_class);
+          highlitedSpan.classList.remove(config.neigh_class);
         });
       }
     },
@@ -308,7 +304,7 @@ function handleDoubleClick(event, spanId) {
 function findPreviousVisibleSibling(element) {
   let sibling = element.previousElementSibling;
   while (sibling) {
-    if (!sibling.matches(".om.hidden")) {
+    if (!sibling.matches(`.${config.omitted_line_class}.${config.hidden_element_class}`)) {
       return sibling;
     }
     sibling = sibling.previousElementSibling;
