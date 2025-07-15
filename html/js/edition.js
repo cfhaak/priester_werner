@@ -1,3 +1,4 @@
+import ColumnViewerConfig from './column_viewer_config.js';
 let default_global_scroll = false;
 let global_scroll = default_global_scroll;
 let existingColumns = [];
@@ -13,13 +14,9 @@ let displayLinenrLocal = false;
 let config = {};
 
 async function loadConfig() {
-  try {
-    const response = await fetch("./js/column_viewer_config.json");
-    config = await response.json();
-  } catch (error) {
-    console.error("Failed to load config:", error);
-  }
+  config = new ColumnViewerConfig();
 }
+
 
 // Usage: Call loadConfig() before anything else in your DOMContentLoaded handler
 document.addEventListener("DOMContentLoaded", async () => {
