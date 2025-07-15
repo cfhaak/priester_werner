@@ -53,37 +53,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     .catch((error) => console.error("Failed to load snippet metadata:", error));
 });
 
-function addRemoveColumnListener() {
-  witnessContainer.addEventListener("click", function (event) {
-    if (event.target.matches(`.${config.remove_column_button_class}`)) {
-      const columnId = event.target.closest(`.${config.witness_class}`).id;
-      removeColumn(columnId);
-    }
-  });
-}
-
-function addDropdownChangeListener() {
-  witnessContainer.addEventListener("change", function (event) {
-    if (event.target.matches(`.${config.dropdown_class}`)) {
-      const columnId = event.target.getAttribute("data-column-id");
-      updateColumn(columnId, null, event.target);
-    }
-  });
-}
-
-function addLineClickListener() {
-  witnessContainer.addEventListener("dblclick", function (event) {
-    console.log("Double-click detected on witness line.");
-    // Find the closest .witness-line element
-    const line = event.target.closest(`.${config.witness_line_class}`);
-    if (line && witnessContainer.contains(line)) {
-      // Use the global line number as the spanId
-      const spanId = line.getAttribute("id");
-      handleDoubleClick(event, spanId);
-    }
-  });
-}
-
 function sortWitnessIdsBySorting(metadata) {
   return Object.entries(metadata)
     .sort((a, b) => a[1].sorting.localeCompare(b[1].sorting))
@@ -375,6 +344,38 @@ function findPreviousVisibleSibling(element) {
     sibling = sibling.previousElementSibling;
   }
   return null;
+}
+
+
+function addRemoveColumnListener() {
+  witnessContainer.addEventListener("click", function (event) {
+    if (event.target.matches(`.${config.remove_column_button_class}`)) {
+      const columnId = event.target.closest(`.${config.witness_class}`).id;
+      removeColumn(columnId);
+    }
+  });
+}
+
+function addDropdownChangeListener() {
+  witnessContainer.addEventListener("change", function (event) {
+    if (event.target.matches(`.${config.dropdown_class}`)) {
+      const columnId = event.target.getAttribute("data-column-id");
+      updateColumn(columnId, null, event.target);
+    }
+  });
+}
+
+function addLineClickListener() {
+  witnessContainer.addEventListener("dblclick", function (event) {
+    console.log("Double-click detected on witness line.");
+    // Find the closest .witness-line element
+    const line = event.target.closest(`.${config.witness_line_class}`);
+    if (line && witnessContainer.contains(line)) {
+      // Use the global line number as the spanId
+      const spanId = line.getAttribute("id");
+      handleDoubleClick(event, spanId);
+    }
+  });
 }
 
 // this if for the controlls container, remove it, if you rather do this differently
