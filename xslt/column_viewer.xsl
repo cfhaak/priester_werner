@@ -21,7 +21,7 @@
                     <xsl:with-param name="html_title" select="$doc_title"></xsl:with-param>
                 </xsl:call-template>
                 <link rel="stylesheet" href="css/edition_style.css"/>
-                <script src="js/edition.js"/>
+                <script type="module" src="js/edition.js"/>
             </head>
             <body>
                 <xsl:call-template name="nav_bar" />
