@@ -157,6 +157,7 @@
     <xsl:template match="tei:l">
         <xsl:variable name="class" select="
             if (@ana = 'om') then 'om'
+            else if (not(normalize-space(.))) then 'om'
             else if (@ana = 'last') then 'last'
             else 'normal'" />
         <xsl:variable name="linenr-global" select="@n" />
