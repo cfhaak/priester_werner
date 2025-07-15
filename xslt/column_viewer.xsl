@@ -35,12 +35,15 @@
                             <xsl:value-of select="$project_title" />
                         </h2>
                     </div>
-                    <div>
-                        <div id="column-adder"></div>
-                        <div id="scroll-toggler"></div>
-                        <div id="empty-line-toggler"></div>
-                        <div id="global-linenr-toggler"></div>
-                        <div id="local-linenr-toggler"></div>
+                    <div class="witness_view_controls_wrapper">
+                        <div class="witness_view_controls_toggle">Menu</div>
+                        <div class="witness_view_controls">
+                            <div id="column-adder"></div>
+                            <div id="scroll-toggler"></div>
+                            <div id="empty-line-toggler"></div>
+                            <div id="global-linenr-toggler"></div>
+                            <div id="local-linenr-toggler"></div>
+                        </div>
                     </div>
                     <div id="witness-container"></div>
                 </main>

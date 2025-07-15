@@ -11,21 +11,53 @@ html, body, main {
 div {
     box-sizing: border-box;
 }
-.container {
-    max-width: 100%;
-    margin: 0 auto;
+
+div.witness_view_controls_wrapper {
     position: relative;
+    display: inline-block; /* Ensure it fits the width of its content */
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+    margin-left: 0.3rem;
 }
 
-.controls-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
+div.witness_view_controls_toggle {
+    padding: 10px 20px;
+    background: #eee;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    border-radius: 4px;
+    display: inline-block;
+    user-select: none;
+    position: relative;
+    z-index: 101;
 }
 
+div.witness_view_controls {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 100;
+    padding: 10px;
+    min-width: 200px;
+}
 
+div.witness_view_controls.open {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 100;
+    padding: 10px;
+    min-width: 200px;
+}
 
 #witness-container {
+    margin: .3rem;
     display: inline-flex; /* Use inline-flex to fit the width of children */
     flex-direction: row; /* Arrange children in a row */
     flex-wrap: nowrap; /* Prevent wrapping */

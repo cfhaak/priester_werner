@@ -376,3 +376,20 @@ function findPreviousVisibleSibling(element) {
   }
   return null;
 }
+
+// this if for the controlls container, remove it, if you rather do this differently
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.querySelector('.witness_view_controls_toggle');
+  const controls = document.querySelector('.witness_view_controls');
+
+  toggle.addEventListener('click', (e) => {
+    controls.classList.toggle('open');
+    e.stopPropagation();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!controls.contains(e.target) && !toggle.contains(e.target)) {
+      controls.classList.remove('open');
+    }
+  });
+});
