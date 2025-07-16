@@ -62,12 +62,15 @@ function sortWitnessIdsBySorting(metadata) {
 async function fetchSnippet(filename) {
   try {
     const response = await fetch(filename);
+    if (!response.ok) {
+      console.error(`HTTP error ${response.status} when fetching ${filename}`);
+      return `Resource '${filename}' couldn't be loaded. Please contact the administrator.`;
+    }
     const htmlText = await response.text();
-    return new DOMParser().parseFromString(htmlText, "text/html").body
-      .innerHTML;
+    return new DOMParser().parseFromString(htmlText, "text/html").body.innerHTML;
   } catch (error) {
     console.error(`Error fetching snippet from ${filename}:`, error);
-    return "";
+    return `Resource '${filename}' couldn't be loaded. Please contact the administrator. ${error.message}`;
   }
 }
 
@@ -162,7 +165,6 @@ function createColumn(container, columnIndex, witnessId) {
 }
 
 function updateColumn(columnId, snippet, selectElement = null) {
-  console.log(`Updating column: ${columnId}`);
   const columnElement = document.getElementById(columnId);
   const textContentElement = columnElement.querySelector(
     `.${config.text_content_class}`
@@ -367,7 +369,6 @@ function addDropdownChangeListener() {
 
 function addLineClickListener() {
   witnessContainer.addEventListener("dblclick", function (event) {
-    console.log("Double-click detected on witness line.");
     // Find the closest .witness-line element
     const line = event.target.closest(`.${config.witness_line_class}`);
     if (line && witnessContainer.contains(line)) {
