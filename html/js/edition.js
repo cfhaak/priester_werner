@@ -1,57 +1,296 @@
 import ColumnViewerConfig from "./column_viewer_config.js";
-let default_global_scroll = false;
-let global_scroll = default_global_scroll;
-let existingColumns = [];
-let snippetsByLabels = [];
-let witness_metadata = [];
-let sortedWitnessIds = [];
-let witness_by_id = [];
-let columnCount = 0;
-let witnessContainer;
-let displayEmtyLines = true;
-let displayLinenrGlobal = true;
-let displayLinenrLocal = false;
-let config = {};
 
-async function loadConfig() {
-  config = new ColumnViewerConfig();
+class EditionState {
+  constructor(config, witness_metadata, sortedWitnessIds) {
+    this.config = config;
+    this.witness_metadata = witness_metadata;
+    this.sortedWitnessIds = sortedWitnessIds;
+    this.snippetsByLabels = {};
+    this.columns = []; // [{id, witnessId}]
+    this.globalScroll = false;
+    this.displayEmptyLines = true;
+    this.displayLinenrGlobal = true;
+    this.displayLinenrLocal = false;
+    this.witnessContainer = document.getElementById(config.witnessContainerId);
+    this.columnCount = 0;
+    this.initListeners();
+  }
+
+  initListeners() {
+    this.witnessContainer.addEventListener("click", (event) => {
+      if (event.target.matches(`.${this.config.remove_column_button_class}`)) {
+        const columnId = event.target.closest(`.${this.config.witness_class}`).id;
+        this.removeColumn(columnId);
+      }
+    });
+
+    this.witnessContainer.addEventListener("change", (event) => {
+      if (event.target.matches(`.${this.config.dropdown_class}`)) {
+        const columnId = event.target.getAttribute("data-column-id");
+        this.updateColumnWitness(columnId, event.target.value);
+      }
+    });
+
+    this.witnessContainer.addEventListener("dblclick", (event) => {
+      const line = event.target.closest(`.${this.config.witness_line_class}`);
+      if (line && this.witnessContainer.contains(line)) {
+        const spanId = line.getAttribute("id");
+        this.handleDoubleClick(event, spanId);
+      }
+    });
+  }
+
+  async getSnippet(witnessId) {
+    if (this.snippetsByLabels[witnessId]) {
+      return this.snippetsByLabels[witnessId];
+    }
+    try {
+      const response = await fetch(this.witness_metadata[witnessId].filepath);
+      if (!response.ok) {
+        return `Resource '${this.witness_metadata[witnessId].filepath}' couldn't be loaded.`;
+      }
+      const htmlText = await response.text();
+      const snippet = new DOMParser().parseFromString(htmlText, "text/html").body.innerHTML;
+      this.snippetsByLabels[witnessId] = snippet;
+      return snippet;
+    } catch (error) {
+      return `Resource '${this.witness_metadata[witnessId].filepath}' couldn't be loaded. ${error.message}`;
+    }
+  }
+
+  generateDropdown(columnId, currentWitnessId) {
+    return `
+      <select class="${this.config.dropdown_class}" data-column-id="${columnId}">
+        ${this.sortedWitnessIds
+          .map(
+            (witnessId) =>
+              `<option value="${witnessId}" ${
+                witnessId === currentWitnessId ? "selected" : ""
+              }>${this.witness_metadata[witnessId].title}</option>`
+          )
+          .join("")}
+      </select>`;
+  }
+
+  createColumnHTML(columnId, witnessId) {
+    const cssClass = this.globalScroll
+      ? this.config.GLOBAL_SCROLL_CLASS
+      : this.config.INDIVIDUAL_SCROLL_CLASS;
+    return `
+      <div id="${columnId}" class="${this.config.witness_class} ${cssClass}">
+        <div class="${this.config.controls_container_class}">
+          ${this.generateDropdown(columnId, witnessId)}
+          <button class="${this.config.remove_column_button_class}" title="Remove Column">&times;</button>
+        </div>
+        <div class="${this.config.text_content_class} ${cssClass}">
+          ${this.witness_metadata[witnessId].title || "Error while loading."}
+        </div>
+      </div>`;
+  }
+
+  async renderAllColumns() {
+    this.witnessContainer.innerHTML = "";
+    for (const col of this.columns) {
+      this.witnessContainer.innerHTML += this.createColumnHTML(col.id, col.witnessId);
+    }
+    for (const col of this.columns) {
+      await this.renderColumn(col.id);
+    }
+    this.applyGlobalSettings();
+  }
+
+  async renderColumn(columnId) {
+    const col = this.columns.find(c => c.id === columnId);
+    if (!col) return;
+    const snippet = await this.getSnippet(col.witnessId);
+    this.updateColumnContent(col.id, snippet);
+  }
+
+  async addColumn(witnessId) {
+    this.columnCount++;
+    const columnId = `Witness_column_${String(this.columnCount).padStart(2, "0")}`;
+    this.columns.push({ id: columnId, witnessId });
+    const columnHTML = this.createColumnHTML(columnId, witnessId);
+    this.witnessContainer.insertAdjacentHTML('beforeend', columnHTML);
+    await this.renderColumn(columnId);
+    this.applyGlobalSettings(columnId); // Only update the new column
+  }
+
+  async removeColumn(columnId) {
+    this.columns = this.columns.filter(col => col.id !== columnId);
+    await this.renderAllColumns();
+  }
+
+  async updateColumnWitness(columnId, witnessId) {
+    const col = this.columns.find(col => col.id === columnId);
+    if (col) {
+      col.witnessId = witnessId;
+      await this.renderColumn(columnId);
+    }
+  }
+
+  async addNewColumn() {
+    const witnessId = this.sortedWitnessIds[this.columnCount] || this.sortedWitnessIds[0];
+    await this.addColumn(witnessId);
+  }
+
+  toggleScrollingBehaviour() {
+    this.globalScroll = !this.globalScroll;
+    this.renderAllColumns();
+  }
+
+  toggleEmptyLinesVisibility() {
+    this.displayEmptyLines = !this.displayEmptyLines;
+    this.renderAllColumns();
+  }
+
+  toggleGlobalLinecounterVisibility() {
+    this.displayLinenrGlobal = !this.displayLinenrGlobal;
+    this.renderAllColumns();
+  }
+
+  toggleLocalLinecounterVisibility() {
+    this.displayLinenrLocal = !this.displayLinenrLocal;
+    this.renderAllColumns();
+  }
+
+  updateColumnContent(columnId, snippet) {
+    const columnElement = document.getElementById(columnId);
+    if (!columnElement) return;
+    const textContentElement = columnElement.querySelector(`.${this.config.text_content_class}`);
+    textContentElement.innerHTML = snippet || "Error while loading...";
+    this.setEmptyLinesVisibility(textContentElement);
+    this.setGlobalLinecounterVisibility(textContentElement);
+    this.setLocalLinecounterVisibility(textContentElement);
+  }
+
+  setEmptyLinesVisibility(textContentElement) {
+    textContentElement
+      .querySelectorAll(
+        `.${this.config.witness_line_class}.${this.config.omitted_line_class}`
+      )
+      .forEach((line) => {
+        line.classList.toggle(this.config.hidden_element_class, !this.displayEmptyLines);
+      });
+  }
+
+  setGlobalLinecounterVisibility(textContentElement) {
+    textContentElement
+      .querySelectorAll(`.${this.config.global_line_counter_class}`)
+      .forEach((line) => {
+        line.classList.toggle(this.config.hidden_element_class, !this.displayLinenrGlobal);
+      });
+  }
+
+  setLocalLinecounterVisibility(textContentElement) {
+    textContentElement
+      .querySelectorAll(`.${this.config.local_line_counter_class}`)
+      .forEach((line) => {
+        line.classList.toggle(this.config.hidden_element_class, !this.displayLinenrLocal);
+      });
+  }
+
+  applyGlobalSettings(columnId = null) {
+    if (columnId) {
+      // Only update the specified column
+      const columnElement = document.getElementById(columnId);
+      if (columnElement) {
+        const textContent = columnElement.querySelector(`.${this.config.text_content_class}`);
+        this.toggleScrollClass(textContent, this.globalScroll);
+        this.toggleScrollClass(columnElement, this.globalScroll);
+      }
+    } else {
+      // Update all columns
+      const text_contents = this.witnessContainer.getElementsByClassName(this.config.text_content_class);
+      const witnesses = this.witnessContainer.getElementsByClassName(this.config.witness_class);
+      for (const text_content of text_contents) {
+        this.toggleScrollClass(text_content, this.globalScroll);
+      }
+      for (const witness of witnesses) {
+        this.toggleScrollClass(witness, this.globalScroll);
+      }
+    }
+  }
+
+  toggleScrollClass(element, globalScroll) {
+    if (element) {
+      element.classList.toggle(this.config.INDIVIDUAL_SCROLL_CLASS, !globalScroll);
+      element.classList.toggle(this.config.GLOBAL_SCROLL_CLASS, globalScroll);
+    }
+  }
+
+  handleDoubleClick(event, spanId) {
+    document
+      .querySelectorAll(
+        `.${this.config.text_content_class} span.${this.config.highlight_class}`
+      )
+      .forEach((span) => {
+        span.classList.remove(this.config.highlight_class);
+        span.classList.remove(this.config.neigh_class);
+      });
+
+    const matchingSpans = document.querySelectorAll(
+      `.${this.config.text_content_class} span[id="${spanId}"]`
+    );
+    let highlitedSpans = [];
+    matchingSpans.forEach((matchingSpan) => {
+      if (
+        !matchingSpan.matches(
+          `.${this.config.omitted_line_class}.${this.config.hidden_element_class}`
+        )
+      ) {
+        matchingSpan.classList.add(this.config.highlight_class);
+        matchingSpan.scrollIntoView({ behavior: "smooth", block: "center" });
+        highlitedSpans.push(matchingSpan);
+      } else {
+        const previousVisibleSibling = this.findPreviousVisibleSibling(matchingSpan);
+        if (previousVisibleSibling) {
+          previousVisibleSibling.classList.add(this.config.highlight_class);
+          previousVisibleSibling.classList.add(this.config.neigh_class);
+          previousVisibleSibling.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          highlitedSpans.push(previousVisibleSibling);
+        }
+      }
+    });
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (
+          !e.target.closest(`.${this.config.text_content_class} span[id="${spanId}"]`)
+        ) {
+          highlitedSpans.forEach((highlitedSpan) => {
+            highlitedSpan.classList.remove(this.config.highlight_class);
+            highlitedSpan.classList.remove(this.config.neigh_class);
+          });
+        }
+      },
+      { once: true }
+    );
+  }
+
+  findPreviousVisibleSibling(element) {
+    let sibling = element.previousElementSibling;
+    while (sibling) {
+      if (
+        !sibling.matches(
+          `.${this.config.omitted_line_class}.${this.config.hidden_element_class}`
+        )
+      ) {
+        return sibling;
+      }
+      sibling = sibling.previousElementSibling;
+    }
+    return null;
+  }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadConfig();
-  witnessContainer = document.getElementById(config.witnessContainerId);
-  loadSnippetMetadata()
-    .then((metadata) => {
-      witness_metadata = metadata;
-      sortedWitnessIds = sortWitnessIdsBySorting(metadata);
-      populateColumns();
-      addLineClickListener();
-      addDropdownChangeListener();
-      addRemoveColumnListener();
-      addButton(config.columnAdderId, "Add Column", addNewColumn);
-      addButton(
-        config.scrollTogglerId,
-        "Toggle Scrolling",
-        toggleScrollingBehaviour
-      );
-      addButton(
-        config.emptyLineTogglerId,
-        "Toggle Empty Line Visibility",
-        toggleEmptyLinesVisibility
-      );
-      addButton(
-        config.globalLinenrTogglerId,
-        "Toggle Global Line Counter",
-        toggleGlobalLinecounterVisibility
-      );
-      addButton(
-        config.localLinenrTogglerId,
-        "Toggle Individual Line Counter",
-        toggleLocalLinecounterVisibility
-      );
-    })
-    .catch((error) => console.error("Failed to load snippet metadata:", error));
-});
+async function loadConfig() {
+  return new ColumnViewerConfig();
+}
 
 function sortWitnessIdsBySorting(metadata) {
   return Object.entries(metadata)
@@ -59,139 +298,48 @@ function sortWitnessIdsBySorting(metadata) {
     .map(([key]) => key);
 }
 
-async function fetchSnippet(filename) {
-  try {
-    const response = await fetch(filename);
-    if (!response.ok) {
-      console.error(`HTTP error ${response.status} when fetching ${filename}`);
-      return `Resource '${filename}' couldn't be loaded. Please contact the administrator.`;
-    }
-    const htmlText = await response.text();
-    return new DOMParser().parseFromString(htmlText, "text/html").body.innerHTML;
-  } catch (error) {
-    console.error(`Error fetching snippet from ${filename}:`, error);
-    return `Resource '${filename}' couldn't be loaded. Please contact the administrator. ${error.message}`;
-  }
-}
-
-async function loadSnippetMetadata() {
+async function loadSnippetMetadata(config) {
   try {
     const response = await fetch(config.snippetLogPath);
     return await response.json();
   } catch (error) {
-    console.error(
-      `Error loading snippet metadata from ${config.snippetLogPath}:`,
-      error
-    );
     return {};
   }
 }
 
-function getSnippet(witnessId, callback) {
-  if (snippetsByLabels[witnessId]) {
-    callback(snippetsByLabels[witnessId]);
-  } else {
-    fetchSnippet(witness_metadata[witnessId].filepath)
-      .then((snippet) => {
-        snippetsByLabels[witnessId] = snippet;
-        callback(snippet);
-      })
-      .catch((error) => {
-        console.error(`Error getting snippet for UID ${uid}:`, error);
-        callback("");
-      });
-  }
-}
+document.addEventListener("DOMContentLoaded", async () => {
+  const config = await loadConfig();
+  const witness_metadata = await loadSnippetMetadata(config);
+  const sortedWitnessIds = sortWitnessIdsBySorting(witness_metadata);
+  const editionState = new EditionState(config, witness_metadata, sortedWitnessIds);
 
-function generateDropdown(columnId, currentWitnessId) {
-  return `
-    <select class="${config.dropdown_class}" data-column-id="${columnId}">
-      ${sortedWitnessIds
-        .map(
-          (witnessId) =>
-            `<option value="${witnessId}" ${
-              witnessId === currentWitnessId ? "selected" : ""
-            }>${witness_metadata[witnessId].title}</option>`
-        )
-        .join("")}
-    </select>`;
-}
-
-function removeColumn(columnId) {
-  const columnElement = document.getElementById(columnId);
-  if (columnElement) {
-    columnElement.remove();
-    existingColumns = existingColumns.filter((id) => id !== columnId);
-  }
-}
-
-function createColumnHTML(columnId, witnessId) {
-  const cssClass =
-    global_scroll === true
-      ? config.GLOBAL_SCROLL_CLASS
-      : config.INDIVIDUAL_SCROLL_CLASS;
-  return `
-        <div id="${columnId}" class="${config.witness_class} ${cssClass}">
-            <div class="${config.controls_container_class}">
-                ${generateDropdown(columnId, witnessId)}
-                <button class="${
-                  config.remove_column_button_class
-                }"title="Remove Column">&times;</button>
-            </div>
-            <div class="${config.text_content_class} ${cssClass}">${
-    witness_metadata[witnessId].title || "Error while loading."
-  }</div>
-        </div>`;
-}
-
-function populateColumns() {
-  witnessContainer.innerHTML = "";
-  if (!sortedWitnessIds.length) {
-    console.error("No labels found in filepathsByLabels.");
-    return;
-  }
+  // Initial columns
   for (let i = 1; i <= config.defaultColumnNumber; i++) {
-    columnCount++;
-    const currentWitnessId = sortedWitnessIds[i - 1];
-    if (currentWitnessId) createColumn(witnessContainer, i, currentWitnessId);
+    const witnessId = sortedWitnessIds[i - 1];
+    console.log(`Adding initial column for witnessId: ${witnessId}`);
+    if (witnessId) await editionState.addColumn(witnessId);
   }
-}
 
-function createColumn(container, columnIndex, witnessId) {
-  const columnId = `Witness_column_${String(columnIndex).padStart(2, "0")}`;
-  container.innerHTML += createColumnHTML(columnId, witnessId);
-  if (!existingColumns.includes(columnId)) existingColumns.push(columnId);
-  getSnippet(witnessId, (snippet) => updateColumn(columnId, snippet, null));
-}
+  // Control buttons
+  addButton(config.columnAdderId, "Add Column", () => editionState.addNewColumn());
+  addButton(config.scrollTogglerId, "Toggle Scrolling", () => editionState.toggleScrollingBehaviour());
+  addButton(config.emptyLineTogglerId, "Toggle Empty Line Visibility", () => editionState.toggleEmptyLinesVisibility());
+  addButton(config.globalLinenrTogglerId, "Toggle Global Line Counter", () => editionState.toggleGlobalLinecounterVisibility());
+  addButton(config.localLinenrTogglerId, "Toggle Individual Line Counter", () => editionState.toggleLocalLinecounterVisibility());
 
-function updateColumn(columnId, snippet, selectElement = null) {
-  const columnElement = document.getElementById(columnId);
-  const textContentElement = columnElement.querySelector(
-    `.${config.text_content_class}`
-  );
-  // If a selectElement is provided, fetch the snippet
-  if (selectElement) {
-    getSnippet(selectElement.value, (fetchedSnippet) => {
-      textContentElement.innerHTML = fetchedSnippet || "Loading...";
-      setEmptyLinesVisibility(textContentElement);
-      setGlobalLinecounterVisibility(textContentElement);
-      setLocalLinecounterVisibility(textContentElement);
-    });
-  } else {
-    // Otherwise, use the provided snippet
-    textContentElement.innerHTML = snippet || "Error while loading...";
-    setEmptyLinesVisibility(textContentElement);
-    setGlobalLinecounterVisibility(textContentElement);
-    setLocalLinecounterVisibility(textContentElement);
-  }
-}
-
-function addNewColumn() {
-  columnCount++;
-  const labelKeys = Object.keys(witness_metadata).sort();
-  const defaultKey = labelKeys[columnCount - 1] || labelKeys[0];
-  createColumn(witnessContainer, columnCount, defaultKey);
-}
+  // Controls container toggle
+  const toggle = document.querySelector('.witness_view_controls_toggle');
+  const controls = document.querySelector('.witness_view_controls');
+  toggle.addEventListener('click', (e) => {
+    controls.classList.toggle('open');
+    e.stopPropagation();
+  });
+  document.addEventListener('click', (e) => {
+    if (!controls.contains(e.target) && !toggle.contains(e.target)) {
+      controls.classList.remove('open');
+    }
+  });
+});
 
 function addButton(containerId, text, onClick) {
   const container = document.getElementById(containerId);
@@ -202,196 +350,3 @@ function addButton(containerId, text, onClick) {
     container.appendChild(button);
   }
 }
-
-function toggleScrollingBehaviour() {
-  const text_contents = document.getElementsByClassName(
-    config.text_content_class
-  );
-  const witnesses = document.getElementsByClassName(config.witness_class);
-  for (const text_content of text_contents) {
-    toggleScrollClass(text_content);
-  }
-  for (const witness of witnesses) {
-    toggleScrollClass(witness);
-  }
-  global_scroll = !global_scroll;
-}
-
-function toggleScrollClass(element) {
-  if (element) {
-    element.classList.toggle(config.INDIVIDUAL_SCROLL_CLASS);
-    element.classList.toggle(config.GLOBAL_SCROLL_CLASS);
-  }
-}
-
-function setEmptyLinesVisibility(textContentElement) {
-  textContentElement
-    .querySelectorAll(
-      `.${config.witness_line_class}.${config.omitted_line_class}`
-    )
-    .forEach((line) => {
-      line.classList.toggle(config.hidden_element_class, !displayEmtyLines);
-    });
-}
-
-function toggleEmptyLinesVisibility() {
-  document
-    .querySelectorAll(
-      `.${config.witness_line_class}.${config.omitted_line_class}`
-    )
-    .forEach((line) => line.classList.toggle(config.hidden_element_class));
-  displayEmtyLines = !displayEmtyLines;
-}
-
-function setGlobalLinecounterVisibility(textContentElement) {
-  textContentElement
-    .querySelectorAll(`.${config.global_line_counter_class}`)
-    .forEach((line) => {
-      line.classList.toggle(config.hidden_element_class, !displayLinenrGlobal);
-    });
-}
-
-function toggleGlobalLinecounterVisibility() {
-  document
-    .querySelectorAll(`.${config.global_line_counter_class}`)
-    .forEach((line) => line.classList.toggle(config.hidden_element_class));
-  displayLinenrGlobal = !displayLinenrGlobal;
-}
-
-function setLocalLinecounterVisibility(textContentElement) {
-  textContentElement
-    .querySelectorAll(`.${config.local_line_counter_class}`)
-    .forEach((line) => {
-      line.classList.toggle(config.hidden_element_class, !displayLinenrLocal);
-    });
-}
-
-function toggleLocalLinecounterVisibility() {
-  document
-    .querySelectorAll(`.${config.local_line_counter_class}`)
-    .forEach((line) => line.classList.toggle(config.hidden_element_class));
-  displayLinenrLocal = !displayLinenrLocal;
-}
-
-function handleDoubleClick(event, spanId) {
-  // Remove existing highlights
-  document
-    .querySelectorAll(
-      `.${config.text_content_class} span.${config.highlight_class}`
-    )
-    .forEach((span) => {
-      span.classList.remove(config.highlight_class);
-      span.classList.remove(config.neigh_class);
-    });
-
-  // Highlight all spans with the same ID
-  const matchingSpans = document.querySelectorAll(
-    `.${config.text_content_class} span[id="${spanId}"]`
-  );
-  let highlitedSpans = [];
-  matchingSpans.forEach((matchingSpan) => {
-    if (
-      !matchingSpan.matches(
-        `.${config.omitted_line_class}.${config.hidden_element_class}`
-      )
-    ) {
-      matchingSpan.classList.add(config.highlight_class);
-      // Scroll the span into view if it's visible
-      matchingSpan.scrollIntoView({ behavior: "smooth", block: "center" });
-      highlitedSpans.push(matchingSpan);
-    } else {
-      // Find the next visible sibling and scroll to it
-      const previousVisibleSibling = findPreviousVisibleSibling(matchingSpan);
-      if (previousVisibleSibling) {
-        previousVisibleSibling.classList.add(config.highlight_class);
-        previousVisibleSibling.classList.add(config.neigh_class);
-        previousVisibleSibling.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-        highlitedSpans.push(previousVisibleSibling);
-      }
-    }
-  });
-
-  // Add a one-time click listener to remove highlights when clicking elsewhere
-  document.addEventListener(
-    "click",
-    (e) => {
-      // Check if the click is outside the highlighted spans
-      if (
-        !e.target.closest(`.${config.text_content_class} span[id="${spanId}"]`)
-      ) {
-        highlitedSpans.forEach((highlitedSpan) => {
-          highlitedSpan.classList.remove(config.highlight_class);
-          highlitedSpan.classList.remove(config.neigh_class);
-        });
-      }
-    },
-    { once: true }
-  );
-}
-
-// Helper function to find the next visible sibling
-function findPreviousVisibleSibling(element) {
-  let sibling = element.previousElementSibling;
-  while (sibling) {
-    if (
-      !sibling.matches(
-        `.${config.omitted_line_class}.${config.hidden_element_class}`
-      )
-    ) {
-      return sibling;
-    }
-    sibling = sibling.previousElementSibling;
-  }
-  return null;
-}
-
-
-function addRemoveColumnListener() {
-  witnessContainer.addEventListener("click", function (event) {
-    if (event.target.matches(`.${config.remove_column_button_class}`)) {
-      const columnId = event.target.closest(`.${config.witness_class}`).id;
-      removeColumn(columnId);
-    }
-  });
-}
-
-function addDropdownChangeListener() {
-  witnessContainer.addEventListener("change", function (event) {
-    if (event.target.matches(`.${config.dropdown_class}`)) {
-      const columnId = event.target.getAttribute("data-column-id");
-      updateColumn(columnId, null, event.target);
-    }
-  });
-}
-
-function addLineClickListener() {
-  witnessContainer.addEventListener("dblclick", function (event) {
-    // Find the closest .witness-line element
-    const line = event.target.closest(`.${config.witness_line_class}`);
-    if (line && witnessContainer.contains(line)) {
-      // Use the global line number as the spanId
-      const spanId = line.getAttribute("id");
-      handleDoubleClick(event, spanId);
-    }
-  });
-}
-
-// this if for the controlls container, remove it, if you rather do this differently
-document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.querySelector('.witness_view_controls_toggle');
-  const controls = document.querySelector('.witness_view_controls');
-
-  toggle.addEventListener('click', (e) => {
-    controls.classList.toggle('open');
-    e.stopPropagation();
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!controls.contains(e.target) && !toggle.contains(e.target)) {
-      controls.classList.remove('open');
-    }
-  });
-});
