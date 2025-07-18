@@ -324,8 +324,15 @@ function sortWitnessIdsBySorting(metadata) {
 async function loadSnippetMetadata(config) {
   try {
     const response = await fetch(config.snippetLogPath);
-    return await response.json();
+    if (!response.ok) {
+      console.error(`Error loading snippet metadata: ${response.statusText}`);
+      return {};
+    }
+    else {
+      return response.json();
+    }
   } catch (error) {
+    console.error(`Error loading snippet metadata: ${error.message}`);
     return {};
   }
 }
