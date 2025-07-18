@@ -30,6 +30,12 @@ class ColumnViewerConfig {
   dropdown_class = "witness-dropdown";
   remove_column_button_class = "remove-column-button";
   dropdown_class = "text-select";
+  label_column_adder = "Add Column";
+  label_scroll_toggler = "Toggle Global Scroll";
+  label_empty_line_toggler = "Toggle Empty Lines";
+  label_global_linenr_toggler = "Toggle Global Line Numbers";
+  label_local_linenr_toggler = "Toggle Local Line Numbers";
+  label_remove_column = "Remove Column";
 }
 
 export default ColumnViewerConfig;

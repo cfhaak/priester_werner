@@ -97,6 +97,7 @@ class EditionState {
       await this.renderColumn(col.id);
     }
     this.applyGlobalSettings();
+    this.applyVisibilitySettings();
   }
 
   async renderColumn(columnId) {
@@ -104,6 +105,8 @@ class EditionState {
     if (!col) return;
     const snippet = await this.getSnippet(col.witnessId);
     this.updateColumnContent(col.id, snippet);
+    this.applyGlobalSettings(columnId);
+    this.applyVisibilitySettings(columnId);
   }
 
   async addColumn(witnessId) {
@@ -113,12 +116,12 @@ class EditionState {
     const columnHTML = this.createColumnHTML(columnId, witnessId);
     this.witnessContainer.insertAdjacentHTML('beforeend', columnHTML);
     await this.renderColumn(columnId);
-    this.applyGlobalSettings(columnId); // Only update the new column
   }
 
   async removeColumn(columnId) {
     this.columns = this.columns.filter(col => col.id !== columnId);
-    await this.renderAllColumns();
+    const colElem = document.getElementById(columnId);
+    if (colElem) colElem.remove();
   }
 
   async updateColumnWitness(columnId, witnessId) {
@@ -134,24 +137,28 @@ class EditionState {
     await this.addColumn(witnessId);
   }
 
+  // Only update scroll classes, no rerender
   toggleScrollingBehaviour() {
     this.globalScroll = !this.globalScroll;
-    this.renderAllColumns();
+    this.applyGlobalSettings();
   }
 
+  // Only update empty line classes, no rerender
   toggleEmptyLinesVisibility() {
     this.displayEmptyLines = !this.displayEmptyLines;
-    this.renderAllColumns();
+    this.applyVisibilitySettings();
   }
 
+  // Only update global line counter classes, no rerender
   toggleGlobalLinecounterVisibility() {
     this.displayLinenrGlobal = !this.displayLinenrGlobal;
-    this.renderAllColumns();
+    this.applyVisibilitySettings();
   }
 
+  // Only update local line counter classes, no rerender
   toggleLocalLinecounterVisibility() {
     this.displayLinenrLocal = !this.displayLinenrLocal;
-    this.renderAllColumns();
+    this.applyVisibilitySettings();
   }
 
   updateColumnContent(columnId, snippet) {
@@ -159,9 +166,6 @@ class EditionState {
     if (!columnElement) return;
     const textContentElement = columnElement.querySelector(`.${this.config.text_content_class}`);
     textContentElement.innerHTML = snippet || "Error while loading...";
-    this.setEmptyLinesVisibility(textContentElement);
-    this.setGlobalLinecounterVisibility(textContentElement);
-    this.setLocalLinecounterVisibility(textContentElement);
   }
 
   setEmptyLinesVisibility(textContentElement) {
@@ -190,9 +194,9 @@ class EditionState {
       });
   }
 
+  // Efficiently apply scroll classes
   applyGlobalSettings(columnId = null) {
     if (columnId) {
-      // Only update the specified column
       const columnElement = document.getElementById(columnId);
       if (columnElement) {
         const textContent = columnElement.querySelector(`.${this.config.text_content_class}`);
@@ -200,7 +204,6 @@ class EditionState {
         this.toggleScrollClass(columnElement, this.globalScroll);
       }
     } else {
-      // Update all columns
       const text_contents = this.witnessContainer.getElementsByClassName(this.config.text_content_class);
       const witnesses = this.witnessContainer.getElementsByClassName(this.config.witness_class);
       for (const text_content of text_contents) {
@@ -208,6 +211,26 @@ class EditionState {
       }
       for (const witness of witnesses) {
         this.toggleScrollClass(witness, this.globalScroll);
+      }
+    }
+  }
+
+  // Efficiently apply visibility classes
+  applyVisibilitySettings(columnId = null) {
+    if (columnId) {
+      const columnElement = document.getElementById(columnId);
+      if (columnElement) {
+        const textContent = columnElement.querySelector(`.${this.config.text_content_class}`);
+        this.setEmptyLinesVisibility(textContent);
+        this.setGlobalLinecounterVisibility(textContent);
+        this.setLocalLinecounterVisibility(textContent);
+      }
+    } else {
+      const text_contents = this.witnessContainer.getElementsByClassName(this.config.text_content_class);
+      for (const text_content of text_contents) {
+        this.setEmptyLinesVisibility(text_content);
+        this.setGlobalLinecounterVisibility(text_content);
+        this.setLocalLinecounterVisibility(text_content);
       }
     }
   }
@@ -316,16 +339,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initial columns
   for (let i = 1; i <= config.defaultColumnNumber; i++) {
     const witnessId = sortedWitnessIds[i - 1];
-    console.log(`Adding initial column for witnessId: ${witnessId}`);
     if (witnessId) await editionState.addColumn(witnessId);
   }
 
   // Control buttons
-  addButton(config.columnAdderId, "Add Column", () => editionState.addNewColumn());
-  addButton(config.scrollTogglerId, "Toggle Scrolling", () => editionState.toggleScrollingBehaviour());
-  addButton(config.emptyLineTogglerId, "Toggle Empty Line Visibility", () => editionState.toggleEmptyLinesVisibility());
-  addButton(config.globalLinenrTogglerId, "Toggle Global Line Counter", () => editionState.toggleGlobalLinecounterVisibility());
-  addButton(config.localLinenrTogglerId, "Toggle Individual Line Counter", () => editionState.toggleLocalLinecounterVisibility());
+  addButton(config.columnAdderId, editionState.config.label_column_adder, () => editionState.addNewColumn());
+  addButton(config.scrollTogglerId, editionState.config.label_scroll_toggler, () => editionState.toggleScrollingBehaviour());
+  addButton(config.emptyLineTogglerId, editionState.config.label_empty_line_toggler, () => editionState.toggleEmptyLinesVisibility());
+  addButton(config.globalLinenrTogglerId, editionState.config.label_global_linenr_toggler, () => editionState.toggleGlobalLinecounterVisibility());
+  addButton(config.localLinenrTogglerId, editionState.config.label_local_linenr_toggler, () => editionState.toggleLocalLinecounterVisibility());
 
   // Controls container toggle
   const toggle = document.querySelector('.witness_view_controls_toggle');
