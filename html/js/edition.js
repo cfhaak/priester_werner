@@ -12,6 +12,7 @@ class EditionState {
     this.displayLinenrGlobal = true;
     this.displayLinenrLocal = false;
     this.columnCount = 0;
+    this.lastDoubleClickedSpanId = null; // for double-click handling
   }
 
   addColumn(witnessId) {
@@ -57,6 +58,15 @@ class EditionManager {
     );
     this.initListeners();
   }
+  
+  reloadFromState(newState) {
+    this.state = newState;
+    this.witnessContainer.innerHTML = "";
+    this.renderAllColumns();
+    if (this.state.lastDoubleClickedSpanId) {
+      this.handleDoubleClick("", this.state.lastDoubleClickedSpanId);
+    }
+  }
 
   initListeners() {
     this.witnessContainer.addEventListener("click", (event) => {
@@ -79,6 +89,7 @@ class EditionManager {
       const line = event.target.closest(`.${this.config.witness_line_class}`);
       if (line && this.witnessContainer.contains(line)) {
         const spanId = line.getAttribute("id");
+        this.state.lastDoubleClickedSpanId = spanId;
         this.handleDoubleClick(event, spanId);
       }
     });
