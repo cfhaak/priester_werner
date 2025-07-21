@@ -1,8 +1,8 @@
 import ColumnViewerConfig from "./column_viewer_config.js";
 
+// this class only hold the data representing the current state of the synoptic view
 class EditionState {
-  constructor(config, witness_metadata, sortedWitnessIds) {
-    this.config = config;
+  constructor(witness_metadata, sortedWitnessIds) {
     this.witness_metadata = witness_metadata;
     this.sortedWitnessIds = sortedWitnessIds;
     this.snippetsByLabels = {};
@@ -11,8 +11,50 @@ class EditionState {
     this.displayEmptyLines = true;
     this.displayLinenrGlobal = true;
     this.displayLinenrLocal = false;
-    this.witnessContainer = document.getElementById(config.witnessContainerId);
     this.columnCount = 0;
+  }
+
+  addColumn(witnessId) {
+    this.columnCount++;
+    const columnId = `Witness_column_${String(this.columnCount).padStart(
+      2,
+      "0"
+    )}`;
+    this.columns.push({ id: columnId, witnessId });
+    return columnId;
+  }
+
+  removeColumn(columnId) {
+    this.columns = this.columns.filter((col) => col.id !== columnId);
+  }
+
+  updateColumnWitness(columnId, witnessId) {
+    const col = this.columns.find((col) => col.id === columnId);
+    if (col) col.witnessId = witnessId;
+  }
+
+  getColumn(columnId) {
+    return this.columns.find((col) => col.id === columnId);
+  }
+
+  getAllColumns() {
+    return this.columns;
+  }
+
+  resetColumns() {
+    this.columns = [];
+    this.columnCount = 0;
+  }
+}
+
+// this class manages the rendering and the interaction with user/dom
+class EditionManager {
+  constructor(state, config) {
+    this.state = state;
+    this.config = config;
+    this.witnessContainer = document.getElementById(
+      this.config.witnessContainerId
+    );
     this.initListeners();
   }
 
@@ -43,21 +85,23 @@ class EditionState {
   }
 
   async getSnippet(witnessId) {
-    if (this.snippetsByLabels[witnessId]) {
-      return this.snippetsByLabels[witnessId];
+    if (this.state.snippetsByLabels[witnessId]) {
+      return this.state.snippetsByLabels[witnessId];
     }
     try {
-      const response = await fetch(this.witness_metadata[witnessId].filepath);
+      const response = await fetch(
+        this.state.witness_metadata[witnessId].filepath
+      );
       if (!response.ok) {
-        return `Resource '${this.witness_metadata[witnessId].filepath}' couldn't be loaded.`;
+        return `Resource '${this.state.witness_metadata[witnessId].filepath}' couldn't be loaded.`;
       }
       const htmlText = await response.text();
       const snippet = new DOMParser().parseFromString(htmlText, "text/html")
         .body.innerHTML;
-      this.snippetsByLabels[witnessId] = snippet;
+      this.state.snippetsByLabels[witnessId] = snippet;
       return snippet;
     } catch (error) {
-      return `Resource '${this.witness_metadata[witnessId].filepath}' couldn't be loaded. ${error.message}`;
+      return `Resource '${this.state.witness_metadata[witnessId].filepath}' couldn't be loaded. ${error.message}`;
     }
   }
 
@@ -66,19 +110,19 @@ class EditionState {
       <select class="${
         this.config.dropdown_class
       }" data-column-id="${columnId}">
-        ${this.sortedWitnessIds
+        ${this.state.sortedWitnessIds
           .map(
             (witnessId) =>
               `<option value="${witnessId}" ${
                 witnessId === currentWitnessId ? "selected" : ""
-              }>${this.witness_metadata[witnessId].title}</option>`
+              }>${this.state.witness_metadata[witnessId].title}</option>`
           )
           .join("")}
       </select>`;
   }
 
   createColumnHTML(columnId, witnessId) {
-    const cssClass = this.globalScroll
+    const cssClass = this.state.globalScroll
       ? this.config.GLOBAL_SCROLL_CLASS
       : this.config.INDIVIDUAL_SCROLL_CLASS;
     return `
@@ -90,20 +134,23 @@ class EditionState {
           }" title="Remove Column">&times;</button>
         </div>
         <div class="${this.config.text_content_class} ${cssClass}">
-          ${this.witness_metadata[witnessId].title || "Error while loading."}
+          ${
+            this.state.witness_metadata[witnessId].title ||
+            "Error while loading."
+          }
         </div>
       </div>`;
   }
 
   async renderAllColumns() {
     this.witnessContainer.innerHTML = "";
-    for (const col of this.columns) {
+    for (const col of this.state.getAllColumns()) {
       this.witnessContainer.innerHTML += this.createColumnHTML(
         col.id,
         col.witnessId
       );
     }
-    for (const col of this.columns) {
+    for (const col of this.state.getAllColumns()) {
       await this.renderColumn(col.id);
     }
     this.applyScrollSettings();
@@ -111,7 +158,7 @@ class EditionState {
   }
 
   async renderColumn(columnId) {
-    const col = this.columns.find((c) => c.id === columnId);
+    const col = this.state.getColumn(columnId);
     if (!col) return;
     const snippet = await this.getSnippet(col.witnessId);
     this.updateColumnContent(col.id, snippet);
@@ -119,59 +166,54 @@ class EditionState {
     this.applyVisibilitySettings(columnId);
   }
 
-  async addColumn(witnessId) {
-    this.columnCount++;
-    const columnId = `Witness_column_${String(this.columnCount).padStart(
-      2,
-      "0"
-    )}`;
-    this.columns.push({ id: columnId, witnessId });
+  addColumnContainer(witnessId) {
+    const columnId = this.state.addColumn(witnessId);
     const columnHTML = this.createColumnHTML(columnId, witnessId);
     this.witnessContainer.insertAdjacentHTML("beforeend", columnHTML);
+    return columnId;
+  }
+
+  async addColumn(witnessId) {
+    const columnId = this.addColumnContainer(witnessId);
     await this.renderColumn(columnId);
   }
 
   async removeColumn(columnId) {
-    this.columns = this.columns.filter((col) => col.id !== columnId);
+    this.state.removeColumn(columnId);
     const colElem = document.getElementById(columnId);
     if (colElem) colElem.remove();
   }
 
   async updateColumnWitness(columnId, witnessId) {
-    const col = this.columns.find((col) => col.id === columnId);
-    if (col) {
-      col.witnessId = witnessId;
-      await this.renderColumn(columnId);
-    }
+    this.state.updateColumnWitness(columnId, witnessId);
+    await this.renderColumn(columnId);
   }
 
   async addNewColumn() {
     const witnessId =
-      this.sortedWitnessIds[this.columnCount] || this.sortedWitnessIds[0];
+      this.state.sortedWitnessIds[this.state.columnCount] ||
+      this.state.sortedWitnessIds[0];
     await this.addColumn(witnessId);
   }
 
-  // Only update scroll classes, no rerender
+  // The following methods are unchanged, just use this.state for settings
   toggleScrollingBehaviour() {
-    this.globalScroll = !this.globalScroll;
+    this.state.globalScroll = !this.state.globalScroll;
     this.applyScrollSettings();
   }
 
-  // Only update empty line classes, no rerender
   toggleEmptyLinesVisibility() {
-    this.displayEmptyLines = !this.displayEmptyLines;
+    this.state.displayEmptyLines = !this.state.displayEmptyLines;
     this.applyVisibilitySettings();
   }
 
-  // Only update global line counter classes, no rerender
   toggleGlobalLinecounterVisibility() {
-    this.displayLinenrGlobal = !this.displayLinenrGlobal;
+    this.state.displayLinenrGlobal = !this.state.displayLinenrGlobal;
     this.applyVisibilitySettings();
   }
 
-  // Only update local line counter classes, no rerender
   toggleLocalLinecounterVisibility() {
-    this.displayLinenrLocal = !this.displayLinenrLocal;
+    this.state.displayLinenrLocal = !this.state.displayLinenrLocal;
     this.applyVisibilitySettings();
   }
 
@@ -192,7 +234,7 @@ class EditionState {
       .forEach((line) => {
         line.classList.toggle(
           this.config.hidden_element_class,
-          !this.displayEmptyLines
+          !this.state.displayEmptyLines
         );
       });
   }
@@ -203,7 +245,7 @@ class EditionState {
       .forEach((line) => {
         line.classList.toggle(
           this.config.hidden_element_class,
-          !this.displayLinenrGlobal
+          !this.state.displayLinenrGlobal
         );
       });
   }
@@ -214,12 +256,11 @@ class EditionState {
       .forEach((line) => {
         line.classList.toggle(
           this.config.hidden_element_class,
-          !this.displayLinenrLocal
+          !this.state.displayLinenrLocal
         );
       });
   }
 
-  // Efficiently apply scroll classes
   applyScrollSettings(columnId = null) {
     if (columnId) {
       const columnElement = document.getElementById(columnId);
@@ -227,8 +268,8 @@ class EditionState {
         const textContent = columnElement.querySelector(
           `.${this.config.text_content_class}`
         );
-        this.toggleScrollClass(textContent, this.globalScroll);
-        this.toggleScrollClass(columnElement, this.globalScroll);
+        this.toggleScrollClass(textContent, this.state.globalScroll);
+        this.toggleScrollClass(columnElement, this.state.globalScroll);
       }
     } else {
       const text_contents = this.witnessContainer.getElementsByClassName(
@@ -238,15 +279,14 @@ class EditionState {
         this.config.witness_class
       );
       for (const text_content of text_contents) {
-        this.toggleScrollClass(text_content, this.globalScroll);
+        this.toggleScrollClass(text_content, this.state.globalScroll);
       }
       for (const witness of witnesses) {
-        this.toggleScrollClass(witness, this.globalScroll);
+        this.toggleScrollClass(witness, this.state.globalScroll);
       }
     }
   }
 
-  // Efficiently apply visibility classes
   applyVisibilitySettings(columnId = null) {
     if (columnId) {
       const columnElement = document.getElementById(columnId);
@@ -352,12 +392,19 @@ class EditionState {
   }
 
   async initColumns() {
+    let columnIds = [];
     for (let i = 1; i <= this.config.defaultColumnNumber; i++) {
-      const witnessId = this.sortedWitnessIds[i - 1];
-      if (witnessId) await this.addColumn(witnessId);
+      const witnessId = this.state.sortedWitnessIds[i - 1];
+      if (witnessId) {
+        const columnId = this.addColumnContainer(witnessId);
+        columnIds.push(columnId);
+      }
     }
+    await Promise.all(columnIds.map((id) => this.renderColumn(id)));
   }
 }
+
+// --- HELPERS ---
 
 async function loadConfig() {
   return new ColumnViewerConfig();
@@ -384,56 +431,6 @@ async function loadSnippetMetadata(config) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const config = await loadConfig();
-  const witness_metadata = await loadSnippetMetadata(config);
-  const sortedWitnessIds = sortWitnessIdsBySorting(witness_metadata);
-  const editionState = new EditionState(
-    config,
-    witness_metadata,
-    sortedWitnessIds
-  );
-  await editionState.initColumns();
-
-  // Control buttons
-  addButton(config.columnAdderId, editionState.config.label_column_adder, () =>
-    editionState.addNewColumn()
-  );
-  addButton(
-    config.scrollTogglerId,
-    editionState.config.label_scroll_toggler,
-    () => editionState.toggleScrollingBehaviour()
-  );
-  addButton(
-    config.emptyLineTogglerId,
-    editionState.config.label_empty_line_toggler,
-    () => editionState.toggleEmptyLinesVisibility()
-  );
-  addButton(
-    config.globalLinenrTogglerId,
-    editionState.config.label_global_linenr_toggler,
-    () => editionState.toggleGlobalLinecounterVisibility()
-  );
-  addButton(
-    config.localLinenrTogglerId,
-    editionState.config.label_local_linenr_toggler,
-    () => editionState.toggleLocalLinecounterVisibility()
-  );
-
-  // Controls container toggle
-  const toggle = document.querySelector(".witness_view_controls_toggle");
-  const controls = document.querySelector(".witness_view_controls");
-  toggle.addEventListener("click", (e) => {
-    controls.classList.toggle("open");
-    e.stopPropagation();
-  });
-  document.addEventListener("click", (e) => {
-    if (!controls.contains(e.target) && !toggle.contains(e.target)) {
-      controls.classList.remove("open");
-    }
-  });
-});
-
 function addButton(containerId, text, onClick) {
   const container = document.getElementById(containerId);
   if (container) {
@@ -443,3 +440,53 @@ function addButton(containerId, text, onClick) {
     container.appendChild(button);
   }
 }
+
+function createControls(config, manager) {
+  addButton(config.columnAdderId, config.label_column_adder, () =>
+    manager.addNewColumn()
+  );
+  addButton(config.scrollTogglerId, config.label_scroll_toggler, () =>
+    manager.toggleScrollingBehaviour()
+  );
+  addButton(config.emptyLineTogglerId, config.label_empty_line_toggler, () =>
+    manager.toggleEmptyLinesVisibility()
+  );
+  addButton(
+    config.globalLinenrTogglerId,
+    config.label_global_linenr_toggler,
+    () => manager.toggleGlobalLinecounterVisibility()
+  );
+  addButton(
+    config.localLinenrTogglerId,
+    config.label_local_linenr_toggler,
+    () => manager.toggleLocalLinecounterVisibility()
+  );
+
+  const toggle = document.querySelector(
+    `.${config.class_of_controls_container_toggler}`
+  );
+  const controls = document.querySelector(
+    `.${config.class_of_controls_container}`
+  );
+  toggle.addEventListener("click", (e) => {
+    controls.classList.toggle("open");
+    e.stopPropagation();
+  });
+  document.addEventListener("click", (e) => {
+    if (!controls.contains(e.target) && !toggle.contains(e.target)) {
+      controls.classList.remove("open");
+    }
+  });
+}
+
+// --- MAIN ---
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const config = await loadConfig();
+  const witness_metadata = await loadSnippetMetadata(config);
+  const sortedWitnessIds = sortWitnessIdsBySorting(witness_metadata);
+  const state = new EditionState(witness_metadata, sortedWitnessIds);
+  const manager = new EditionManager(state, config);
+  await manager.initColumns();
+  createControls(config, manager);
+});
