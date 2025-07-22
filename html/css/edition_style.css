@@ -1,4 +1,6 @@
-html, body, main {
+html,
+body,
+main {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -14,7 +16,8 @@ div {
 
 div.witness_view_controls_wrapper {
     position: relative;
-    display: inline-block; /* Ensure it fits the width of its content */
+    display: inline-block;
+    /* Ensure it fits the width of its content */
     margin-bottom: 1rem;
     margin-top: 2rem;
     margin-left: 0.3rem;
@@ -33,12 +36,13 @@ button.witness_view_controls_toggle {
 }
 
 div.witness_view_controls {
-    display: none; /* Hidden by default */
+    display: none;
+    /* Hidden by default */
     position: absolute;
     top: 100%;
     left: 0;
     background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 100;
     padding: 10px;
     min-width: 200px;
@@ -50,7 +54,7 @@ div.witness_view_controls.open {
     top: 100%;
     left: 0;
     background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 100;
     padding: 10px;
     min-width: 200px;
@@ -58,19 +62,25 @@ div.witness_view_controls.open {
 
 #witness-container {
     margin: .3rem;
-    display: inline-flex; /* Use inline-flex to fit the width of children */
-    flex-direction: row; /* Arrange children in a row */
-    flex-wrap: nowrap; /* Prevent wrapping */
-    gap: 0.75rem; /* Add spacing between children */
+    display: inline-flex;
+    /* Use inline-flex to fit the width of children */
+    flex-direction: row;
+    /* Arrange children in a row */
+    flex-wrap: nowrap;
+    /* Prevent wrapping */
+    gap: 0.75rem;
+    /* Add spacing between children */
     padding-bottom: 1rem;
     align-items: stretch;
-    white-space: nowrap; /* Prevent children from wrapping */
-    width: auto; /* Ensure the width adjusts to fit children */
+    white-space: nowrap;
+    /* Prevent children from wrapping */
+    width: auto;
+    /* Ensure the width adjusts to fit children */
     height: 100%;
     /* width: 100%; */
     overflow-x: auto;
     overflow-y: auto;
-    height: 100%!
+    height: 100% !
 }
 
 .witness {
@@ -118,17 +128,25 @@ div.witness_view_controls.open {
 
 .controlls-container {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping to the next row */
-    justify-content: space-between; /* Space between dropdown and button */
-    align-items: center; /* Align items vertically */
+    flex-wrap: wrap;
+    /* Allow wrapping to the next row */
+    justify-content: space-between;
+    /* Space between dropdown and button */
+    align-items: center;
+    /* Align items vertically */
     margin-bottom: 10px;
-    position: sticky; /* Make it sticky */
-    top: 0; /* Stick to the top */
-    z-index: 20; /* Ensure it stays above other elements */
-    padding-top: .5rem;}
+    position: sticky;
+    /* Make it sticky */
+    top: 0;
+    /* Stick to the top */
+    z-index: 20;
+    /* Ensure it stays above other elements */
+    padding-top: .5rem;
+}
 
 .controlls-container .remove-column-button {
-    margin-left: auto; /* Push the button to the right */
+    margin-left: auto;
+    /* Push the button to the right */
 }
 
 .col_sw {
@@ -176,6 +194,7 @@ span.highlight {
     background-color: yellow;
     transition: background-color 0.3s ease;
 }
+
 span.highlight.neigh {
     background-color: inherit;
     border-bottom: yellow solid 4px;
@@ -236,5 +255,14 @@ span.editorial_note {
 }
 
 .hidden {
-    display: none!important;
+    display: none !important;
+}
+
+.text-content:focus {
+    outline: 2px solid red !important;
+}
+
+.witness-line:focus {
+    outline: 2px solid red !important;
+    background-color: green !important;
 }

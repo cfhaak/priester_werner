@@ -13,7 +13,8 @@ class EditionState {
     this.displayLinenrLocal = false;
     this.columnIdToColumnIndex = {};
     this.columnCount = 0;
-    this.lastDoubleClickedSpanId = null; // for double-click handling
+    this.lastDoubleClickedSpanId = null;
+    this.currentSelectedElement = null;
   }
 
   getIndexByColumnId(columnId) {
@@ -109,7 +110,7 @@ class EditionManager {
         this.removeColumn(columnId);
       }
     });
-
+    // test
     this.witnessContainer.addEventListener("keydown", (event) => {
       if (
         event.target.matches(`.${this.config.witness_line_class}`) &&
@@ -120,6 +121,59 @@ class EditionManager {
       }
     });
 
+    this.witnessContainer.addEventListener("keydown", (event) => {
+      if (
+        event.target.matches(`.${this.config.text_content_class}`) ||
+        event.target.matches(`.${this.config.text_content_class} > *`)
+      ) {
+        const textContentDiv = event.target.closest(
+          `.${this.config.text_content_class}`
+        );
+        console.log("Active element before:", document.activeElement);
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault(); // Prevent default scrolling behavior
+          if (!this.state.currentSelectedElement) {
+            // Focus the first child if no element is currently selected
+            const firstChild = textContentDiv.firstElementChild;
+            if (firstChild) {
+              firstChild.focus();
+              this.state.currentSelectedElement = firstChild;
+            }
+          } else {
+            // Move focus to the next sibling
+            const nextElement =
+              this.state.currentSelectedElement.nextElementSibling;
+            if (nextElement) {
+              nextElement.focus();
+              this.state.currentSelectedElement = nextElement;
+            }
+          }
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault(); // Prevent default scrolling behavior
+          if (!this.state.currentSelectedElement) {
+            // Focus the first child if no element is currently selected
+            const firstChild = textContentDiv.firstElementChild;
+            if (firstChild) {
+              firstChild.focus();
+              this.state.currentSelectedElement = firstChild;
+            }
+          } else {
+            // Move focus to the previous sibling
+            const prevElement =
+              this.state.currentSelectedElement.previousElementSibling;
+            if (prevElement) {
+              prevElement.focus();
+              this.state.currentSelectedElement = prevElement;
+            }
+          }
+        }
+
+        console.log("Active element after:", document.activeElement);
+      }
+    });
+
+    // test
     this.witnessContainer.addEventListener("change", (event) => {
       if (event.target.matches(`.${this.config.dropdown_class}`)) {
         const columnId = event.target.getAttribute("data-column-id");
@@ -185,6 +239,36 @@ class EditionManager {
     return dropdown;
   }
 
+  createTextContentDiv(cssClass, witnessId) {
+    const textContentDiv = document.createElement("div");
+    textContentDiv.className = `${this.config.text_content_class} ${cssClass}`;
+    textContentDiv.setAttribute("role", "document");
+    textContentDiv.setAttribute("tabindex", "0");
+    textContentDiv.setAttribute(
+      "aria-label",
+      `Text content for ${this.state.witness_metadata[witnessId].title}`
+    );
+    textContentDiv.textContent =
+      this.state.witness_metadata[witnessId].title || "Error while loading.";
+    return textContentDiv;
+  }
+
+  createControlsContainer(columnId, witnessId) {
+    const controlsContainer = document.createElement("div");
+    controlsContainer.className = this.config.controls_container_class;
+    controlsContainer.appendChild(this.generateDropdown(columnId, witnessId));
+    const removeColButton = document.createElement("button");
+    controlsContainer.appendChild(removeColButton);
+    removeColButton.className = this.config.remove_column_button_class;
+    removeColButton.title = this.config.label_remove_column;
+    removeColButton.setAttribute(
+      "aria-label",
+      `Remove column for ${this.state.witness_metadata[witnessId].title}`
+    );
+    removeColButton.innerHTML = "&times;";
+    return controlsContainer;
+  }
+
   createColumnHTML(columnId, witnessId) {
     const cssClass = this.state.globalScroll
       ? this.config.GLOBAL_SCROLL_CLASS
@@ -197,29 +281,8 @@ class EditionManager {
       "aria-label",
       `Column for ${this.state.witness_metadata[witnessId].title}`
     );
-    const controlsContainer = document.createElement("div");
-    columnDiv.appendChild(controlsContainer);
-    controlsContainer.className = this.config.controls_container_class;
-    controlsContainer.appendChild(this.generateDropdown(columnId, witnessId));
-    const removeColButton = document.createElement("button");
-    controlsContainer.appendChild(removeColButton);
-    removeColButton.className = this.config.remove_column_button_class;
-    removeColButton.title = this.config.label_remove_column;
-    removeColButton.setAttribute(
-      "aria-label",
-      `Remove column for ${this.state.witness_metadata[witnessId].title}`
-    );
-    removeColButton.innerHTML = "&times;";
-    const textContentDiv = document.createElement("div");
-    textContentDiv.className = `${this.config.text_content_class} ${cssClass}`;
-    textContentDiv.setAttribute("role", "document");
-    textContentDiv.setAttribute(
-      "aria-label",
-      `Text content for ${this.state.witness_metadata[witnessId].title}`
-    );
-    textContentDiv.textContent =
-      this.state.witness_metadata[witnessId].title || "Error while loading.";
-    columnDiv.appendChild(textContentDiv);
+    columnDiv.appendChild(this.createControlsContainer(columnId, witnessId));
+    columnDiv.appendChild(this.createTextContentDiv(cssClass, witnessId));
     return columnDiv;
   }
 
