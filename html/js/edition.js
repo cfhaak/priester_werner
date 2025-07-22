@@ -88,7 +88,7 @@ class EditionManager {
 
   sendAriaMessage(message) {
     this.ariaElement.textContent = message;
-    console.log(`Aria message sent: ${message}`);
+    // console.log(`Aria message sent: ${message}`);
   }
 
   reloadFromState(newState) {
@@ -107,6 +107,16 @@ class EditionManager {
           `.${this.config.witness_class}`
         ).id;
         this.removeColumn(columnId);
+      }
+    });
+
+    this.witnessContainer.addEventListener("keydown", (event) => {
+      if (
+        event.target.matches(`.${this.config.witness_line_class}`) &&
+        event.key === "Enter"
+      ) {
+        const spanId = event.target.getAttribute("id");
+        this.handleDoubleClick(event, spanId);
       }
     });
 
