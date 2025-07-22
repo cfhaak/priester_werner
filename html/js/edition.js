@@ -443,11 +443,18 @@ class EditionManager {
 
   async initColumns() {
     let columnIds = [];
-    for (let i = 1; i <= this.config.defaultColumnNumber; i++) {
-      const witnessId = this.state.sortedWitnessIds[i - 1];
-      if (witnessId) {
+    if (this.config.fetch_all_witnesses) {
+      for (const witnessId of this.state.sortedWitnessIds) {
         const columnId = this.addColumnContainer(witnessId);
         columnIds.push(columnId);
+      }
+    } else {
+      for (let i = 1; i <= this.config.defaultColumnNumber; i++) {
+        const witnessId = this.state.sortedWitnessIds[i - 1];
+        if (witnessId) {
+          const columnId = this.addColumnContainer(witnessId);
+          columnIds.push(columnId);
+        }
       }
     }
     await Promise.all(columnIds.map((id) => this.renderColumn(id)));

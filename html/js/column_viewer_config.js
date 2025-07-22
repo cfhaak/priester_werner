@@ -38,6 +38,7 @@ class ColumnViewerConfig {
   class_of_controls_container_toggler = "witness_view_controls_toggle";
   class_of_controls_container = "witness_view_controls";
   label_remove_column = "Remove Column";
+  fetch_all_witnesses = true;
 }
 
 export default ColumnViewerConfig;
