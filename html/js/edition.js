@@ -31,6 +31,7 @@ class EditionState {
 
   updateColumnWitness(columnId, witnessId) {
     const col = this.columns.find((col) => col.id === columnId);
+    console.assert(col, `Column with id ${columnId} not found.`);
     if (col) col.witnessId = witnessId;
   }
 
@@ -97,7 +98,7 @@ class EditionManager {
 
   async getSnippet(witnessId) {
     if (this.state.snippetsByLabels[witnessId]) {
-      return this.state.snippetsByLabels[witnessId];
+      return this.state.snippetsByLabels[witnessId].cloneNode(true);
     }
     try {
       const response = await fetch(
@@ -107,10 +108,12 @@ class EditionManager {
         return `Resource '${this.state.witness_metadata[witnessId].filepath}' couldn't be loaded.`;
       }
       const htmlText = await response.text();
-      const snippet = new DOMParser().parseFromString(htmlText, "text/html")
-        .body.innerHTML;
-      this.state.snippetsByLabels[witnessId] = snippet;
-      return snippet;
+      const snippetBody = new DOMParser().parseFromString(
+        htmlText,
+        "text/html"
+      ).body;
+      this.state.snippetsByLabels[witnessId] = snippetBody;
+      return snippetBody.cloneNode(true);
     } catch (error) {
       return `Resource '${this.state.witness_metadata[witnessId].filepath}' couldn't be loaded. ${error.message}`;
     }
@@ -193,8 +196,8 @@ class EditionManager {
   async renderColumn(columnId) {
     const col = this.state.getColumn(columnId);
     if (!col) return;
-    const snippet = await this.getSnippet(col.witnessId);
-    this.updateColumnContent(col.id, snippet);
+    const snippetBody = await this.getSnippet(col.witnessId);
+    this.updateColumnContent(col.id, snippetBody);
     this.applyScrollSettings(columnId);
     this.applyVisibilitySettings(columnId);
   }
@@ -250,13 +253,19 @@ class EditionManager {
     this.applyVisibilitySettings();
   }
 
-  updateColumnContent(columnId, snippet) {
+  updateColumnContent(columnId, snippetBody) {
     const columnElement = document.getElementById(columnId);
     if (!columnElement) return;
     const textContentElement = columnElement.querySelector(
       `.${this.config.text_content_class}`
     );
-    textContentElement.innerHTML = snippet || "Error while loading...";
+    if (textContentElement) {
+      if (snippetBody instanceof HTMLElement) {
+        textContentElement.replaceChildren(...snippetBody.childNodes);
+      }
+    } else {
+      textContentElement.innerHTML = "Error while loading...";
+    }
   }
 
   setEmptyLinesVisibility(textContentElement) {
