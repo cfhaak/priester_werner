@@ -115,7 +115,11 @@ class EditionManager {
       this.state.snippetsByLabels[witnessId] = snippetBody;
       return snippetBody.cloneNode(true);
     } catch (error) {
-      return `Resource '${this.state.witness_metadata[witnessId].filepath}' couldn't be loaded. ${error.message}`;
+      dummyDiv = document.createElement("div")
+      errorSpan = document.createElement("span");
+      errorSpan.textContent = `Resource '${this.state.witness_metadata[witnessId].filepath}' couldn't be loaded. ${error.message}`;
+      dummyDiv.appendChild(errorSpan);
+      return dummyDiv;
     }
   }
 
