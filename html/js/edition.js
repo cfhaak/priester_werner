@@ -134,7 +134,7 @@ class EditionManager {
       }
       dropdown.appendChild(option);
     });
-    return dropdown
+    return dropdown;
   }
 
   createColumnHTML(columnId, witnessId) {
@@ -152,8 +152,7 @@ class EditionManager {
     const controlsContainer = document.createElement("div");
     columnDiv.appendChild(controlsContainer);
     controlsContainer.className = this.config.controls_container_class;
-    dropdown = this.generateDropdown(columnId, witnessId);
-    controlsContainer.appendChild(dropdown)
+    controlsContainer.appendChild(this.generateDropdown(columnId, witnessId));
     const removeColButton = document.createElement("button");
     controlsContainer.appendChild(removeColButton);
     removeColButton.className = this.config.remove_column_button_class;
@@ -203,7 +202,7 @@ class EditionManager {
   addColumnContainer(witnessId) {
     const columnId = this.state.addColumn(witnessId);
     const columnHTML = this.createColumnHTML(columnId, witnessId);
-    this.witnessContainer.insertAdjacentHTML("beforeend", columnHTML);
+    this.witnessContainer.appendChild(columnHTML);
     return columnId;
   }
 
