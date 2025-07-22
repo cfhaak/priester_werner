@@ -20,7 +20,7 @@ div.witness_view_controls_wrapper {
     margin-left: 0.3rem;
 }
 
-div.witness_view_controls_toggle {
+button.witness_view_controls_toggle {
     padding: 10px 20px;
     background: #eee;
     border: 1px solid #ccc;

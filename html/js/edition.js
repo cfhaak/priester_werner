@@ -11,8 +11,13 @@ class EditionState {
     this.displayEmptyLines = true;
     this.displayLinenrGlobal = true;
     this.displayLinenrLocal = false;
+    this.columnIdToColumnIndex = {};
     this.columnCount = 0;
     this.lastDoubleClickedSpanId = null; // for double-click handling
+  }
+
+  getIndexByColumnId(columnId) {
+    return this.columnIdToColumnIndex[columnId];
   }
 
   addColumn(witnessId) {
@@ -22,11 +27,18 @@ class EditionState {
       "0"
     )}`;
     this.columns.push({ id: columnId, witnessId });
+    this.columnIdToColumnIndex[columnId] = this.columns.length - 1;
     return columnId;
   }
 
   removeColumn(columnId) {
     this.columns = this.columns.filter((col) => col.id !== columnId);
+    delete this.columnIdToColumnIndex[columnId];
+    this.columnCount--;
+    // Update indices in columnIdToColumnIndex
+    this.columns.forEach((col, index) => {
+      this.columnIdToColumnIndex[col.id] = index;
+    });
   }
 
   updateColumnWitness(columnId, witnessId) {
@@ -54,10 +66,29 @@ class EditionManager {
   constructor(state, config) {
     this.state = state;
     this.config = config;
+    this.ariaElement = this.makeAriaElement();
     this.witnessContainer = document.getElementById(
       this.config.witnessContainerId
     );
     this.initListeners();
+  }
+  getOneIndexByColumnId(columnId) {
+    return this.state.getIndexByColumnId(columnId) + 1;
+  }
+
+  makeAriaElement() {
+    const liveRegion = document.createElement("div");
+    liveRegion.id = "aria-live-region";
+    liveRegion.setAttribute("aria-live", "polite");
+    liveRegion.style.position = "absolute";
+    liveRegion.style.left = "-9999px"; // Hide it visually but keep it accessible
+    document.body.appendChild(liveRegion);
+    return liveRegion;
+  }
+
+  sendAriaMessage(message) {
+    this.ariaElement.textContent = message;
+    console.log(`Aria message sent: ${message}`);
   }
 
   reloadFromState(newState) {
@@ -190,9 +221,9 @@ class EditionManager {
       docFragment.appendChild(columnHTML);
     }
     this.witnessContainer.appendChild(docFragment);
-    const renderPromises = this.state.getAllColumns().map((col) =>
-      this.renderColumn(col.id)
-    );
+    const renderPromises = this.state
+      .getAllColumns()
+      .map((col) => this.renderColumn(col.id));
     await Promise.all(renderPromises);
     this.applyScrollSettings();
     this.applyVisibilitySettings();
@@ -217,17 +248,31 @@ class EditionManager {
   async addColumn(witnessId) {
     const columnId = this.addColumnContainer(witnessId);
     await this.renderColumn(columnId);
+    this.sendAriaMessage(
+      `Column ${this.getOneIndexByColumnId(columnId)} for ${
+        this.state.witness_metadata[witnessId].title
+      } added. ${this.state.columnCount} columns in total.`
+    );
   }
 
   async removeColumn(columnId) {
+    const oldColumnId = this.getOneIndexByColumnId(columnId);
     this.state.removeColumn(columnId);
     const colElem = document.getElementById(columnId);
     if (colElem) colElem.remove();
+    this.sendAriaMessage(
+      `Column ${oldColumnId} removed. ${this.state.columnCount} columns remaining.`
+    );
   }
 
   async updateColumnWitness(columnId, witnessId) {
     this.state.updateColumnWitness(columnId, witnessId);
     await this.renderColumn(columnId);
+    this.sendAriaMessage(
+      `Column ${this.getOneIndexByColumnId(columnId)} for ${
+        this.state.witness_metadata[witnessId].title
+      } updated.`
+    );
   }
 
   async addNewColumn() {
@@ -237,25 +282,44 @@ class EditionManager {
     await this.addColumn(witnessId);
   }
 
-  // The following methods are unchanged, just use this.state for settings
   toggleScrollingBehaviour() {
     this.state.globalScroll = !this.state.globalScroll;
     this.applyScrollSettings();
+    this.sendAriaMessage(
+      `Global, parallel scrolling of all witnesses is now ${
+        this.state.globalScroll ? "enabled" : "disabled"
+      }.`
+    );
   }
 
   toggleEmptyLinesVisibility() {
     this.state.displayEmptyLines = !this.state.displayEmptyLines;
     this.applyVisibilitySettings();
+    this.sendAriaMessage(
+      `Empty lines are now ${
+        this.state.displayEmptyLines ? "visible" : "hidden"
+      }.`
+    );
   }
 
   toggleGlobalLinecounterVisibility() {
     this.state.displayLinenrGlobal = !this.state.displayLinenrGlobal;
     this.applyVisibilitySettings();
+    this.sendAriaMessage(
+      `Global line numbers are now ${
+        this.state.displayLinenrGlobal ? "visible" : "hidden"
+      }.`
+    );
   }
 
   toggleLocalLinecounterVisibility() {
     this.state.displayLinenrLocal = !this.state.displayLinenrLocal;
     this.applyVisibilitySettings();
+    this.sendAriaMessage(
+      `Local line numbers are now ${
+        this.state.displayLinenrLocal ? "visible" : "hidden"
+      }.`
+    );
   }
 
   updateColumnContent(columnId, snippetBody) {
@@ -476,6 +540,16 @@ class EditionManager {
       }
     }
     await Promise.all(columnIds.map((id) => this.renderColumn(id)));
+    this.sendAriaMessage(
+      `Initialized ${this.state.columnCount} columns with witnesses.`
+    );
+    this.state.columns.forEach((col, index) => {
+      this.sendAriaMessage(
+        `Column ${index + 1} for ${
+          this.state.witness_metadata[col.witnessId].title
+        } initialized.`
+      );
+    });
   }
 }
 
@@ -571,7 +645,6 @@ function createControls(config, manager) {
     }
   });
 }
-
 // --- MAIN ---
 
 document.addEventListener("DOMContentLoaded", async () => {

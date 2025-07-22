@@ -36,7 +36,7 @@
                         </h2>
                     </div>
                     <div class="witness_view_controls_wrapper">
-                        <div class="witness_view_controls_toggle">Menu</div>
+                        <button class="witness_view_controls_toggle">Menu</button>
                         <div class="witness_view_controls">
                             <div id="column-adder"></div>
                             <div id="scroll-toggler"></div>
