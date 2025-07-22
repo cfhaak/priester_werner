@@ -9,7 +9,7 @@
 
     </xsl:template>
     <xsl:template match="tei:head">
-        <h4 tabindex="0">
+        <h4 tabindex="-1">
             <xsl:apply-templates/>
         </h4>
     </xsl:template>
@@ -145,7 +145,7 @@
         <xsl:param name="linenr-global" />
         <xsl:param name="linenr-own" />
 
-        <span class="witness-line {$class}" data-n="{$linenr-global}" id="{$linenr-global}" tabindex="0">
+        <span class="witness-line {$class}" data-n="{$linenr-global}" id="{$linenr-global}" tabindex="-1">
             <span class="linenr-global">
                 <xsl:value-of select="$linenr-global" />
                     &#160;&#160;
