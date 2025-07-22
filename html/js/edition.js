@@ -115,7 +115,7 @@ class EditionManager {
       this.state.snippetsByLabels[witnessId] = snippetBody;
       return snippetBody.cloneNode(true);
     } catch (error) {
-      dummyDiv = document.createElement("div")
+      dummyDiv = document.createElement("div");
       errorSpan = document.createElement("span");
       errorSpan.textContent = `Resource '${this.state.witness_metadata[witnessId].filepath}' couldn't be loaded. ${error.message}`;
       dummyDiv.appendChild(errorSpan);
@@ -190,9 +190,10 @@ class EditionManager {
       docFragment.appendChild(columnHTML);
     }
     this.witnessContainer.appendChild(docFragment);
-    for (const col of this.state.getAllColumns()) {
-      await this.renderColumn(col.id);
-    }
+    const renderPromises = this.state.getAllColumns().map((col) =>
+      this.renderColumn(col.id)
+    );
+    await Promise.all(renderPromises);
     this.applyScrollSettings();
     this.applyVisibilitySettings();
   }
@@ -399,7 +400,7 @@ class EditionManager {
 
   handleDoubleClick(event, spanId) {
     // Remove existing highlights
-    document
+    this.witnessContainer
       .querySelectorAll(
         `.${this.config.text_content_class} span.${this.config.highlight_class}, .${this.config.text_content_class} span.${this.config.neigh_class}`
       )
@@ -409,7 +410,7 @@ class EditionManager {
       });
 
     // Find all matching spans with the same ID
-    const matchingSpans = document.querySelectorAll(
+    const matchingSpans = this.witnessContainer.querySelectorAll(
       `.${this.config.text_content_class} span[id="${spanId}"]`
     );
 
@@ -451,12 +452,13 @@ class EditionManager {
           span.classList.remove(this.config.highlight_class);
           span.classList.remove(this.config.neigh_class);
         });
-        document.removeEventListener("click", removeHighlights);
+        this.witnessContainer.removeEventListener("click", removeHighlights);
       }
     };
-    document.addEventListener("click", removeHighlights);
-  }
 
+    // Attach the listener to the container instead of the document
+    this.witnessContainer.addEventListener("click", removeHighlights);
+  }
   async initColumns() {
     let columnIds = [];
     if (this.config.fetch_all_witnesses) {
