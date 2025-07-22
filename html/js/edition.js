@@ -58,7 +58,7 @@ class EditionManager {
     );
     this.initListeners();
   }
-  
+
   reloadFromState(newState) {
     this.state = newState;
     this.witnessContainer.innerHTML = "";
@@ -117,69 +117,73 @@ class EditionManager {
   }
 
   generateDropdown(columnId, currentWitnessId) {
-    return `
-    <select
-      id="dropdown-${columnId}"
-      class="${this.config.dropdown_class}"
-      data-column-id="${columnId}"
-      aria-label="Select witness for column ${columnId}"
-    >
-      ${this.state.sortedWitnessIds
-        .map(
-          (witnessId) =>
-            `<option value="${witnessId}" ${
-              witnessId === currentWitnessId ? "selected" : ""
-            }>${this.state.witness_metadata[witnessId].title}</option>`
-        )
-        .join("")}
-    </select>`;
+    const dropdown = document.createElement("select");
+    dropdown.className = this.config.dropdown_class;
+    dropdown.setAttribute("data-column-id", columnId);
+    dropdown.setAttribute(
+      "aria-label",
+      `Select witness for column ${columnId}`
+    );
+    dropdown.id = `dropdown-${columnId}`;
+    this.state.sortedWitnessIds.forEach((witnessId) => {
+      const option = document.createElement("option");
+      option.value = witnessId;
+      option.textContent = this.state.witness_metadata[witnessId].title;
+      if (witnessId === currentWitnessId) {
+        option.selected = true;
+      }
+      dropdown.appendChild(option);
+    });
+    return dropdown
   }
 
   createColumnHTML(columnId, witnessId) {
     const cssClass = this.state.globalScroll
       ? this.config.GLOBAL_SCROLL_CLASS
       : this.config.INDIVIDUAL_SCROLL_CLASS;
-    return `
-    <div
-      id="${columnId}"
-      class="${this.config.witness_class} ${cssClass}"
-      role="region"
-      aria-label="Column for ${this.state.witness_metadata[witnessId].title}"
-    >
-      <div class="${this.config.controls_container_class}">
-        ${this.generateDropdown(columnId, witnessId)}
-        <button
-          class="${this.config.remove_column_button_class}"
-          title="Remove Column"
-          aria-label="Remove column for ${
-            this.state.witness_metadata[witnessId].title
-          }"
-        >
-          &times;
-        </button>
-      </div>
-      <div
-        class="${this.config.text_content_class} ${cssClass}"
-        role="document"
-        aria-label="Text content for ${
-          this.state.witness_metadata[witnessId].title
-        }"
-      >
-        ${
-          this.state.witness_metadata[witnessId].title || "Error while loading."
-        }
-      </div>
-    </div>`;
+    const columnDiv = document.createElement("div");
+    columnDiv.id = columnId;
+    columnDiv.className = `${this.config.witness_class} ${cssClass}`;
+    columnDiv.setAttribute("role", "region");
+    columnDiv.setAttribute(
+      "aria-label",
+      `Column for ${this.state.witness_metadata[witnessId].title}`
+    );
+    const controlsContainer = document.createElement("div");
+    columnDiv.appendChild(controlsContainer);
+    controlsContainer.className = this.config.controls_container_class;
+    dropdown = this.generateDropdown(columnId, witnessId);
+    controlsContainer.appendChild(dropdown)
+    const removeColButton = document.createElement("button");
+    controlsContainer.appendChild(removeColButton);
+    removeColButton.className = this.config.remove_column_button_class;
+    removeColButton.title = this.config.label_remove_column;
+    removeColButton.setAttribute(
+      "aria-label",
+      `Remove column for ${this.state.witness_metadata[witnessId].title}`
+    );
+    removeColButton.innerHTML = "&times;";
+    const textContentDiv = document.createElement("div");
+    textContentDiv.className = `${this.config.text_content_class} ${cssClass}`;
+    textContentDiv.setAttribute("role", "document");
+    textContentDiv.setAttribute(
+      "aria-label",
+      `Text content for ${this.state.witness_metadata[witnessId].title}`
+    );
+    textContentDiv.textContent =
+      this.state.witness_metadata[witnessId].title || "Error while loading.";
+    columnDiv.appendChild(textContentDiv);
+    return columnDiv;
   }
 
   async renderAllColumns() {
     this.witnessContainer.innerHTML = "";
+    const docFragment = document.createDocumentFragment();
     for (const col of this.state.getAllColumns()) {
-      this.witnessContainer.innerHTML += this.createColumnHTML(
-        col.id,
-        col.witnessId
-      );
+      const columnHTML = this.createColumnHTML(col.id, col.witnessId);
+      docFragment.appendChild(columnHTML);
     }
+    this.witnessContainer.appendChild(docFragment);
     for (const col of this.state.getAllColumns()) {
       await this.renderColumn(col.id);
     }
