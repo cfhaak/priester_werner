@@ -13,8 +13,26 @@ class EditionState {
     this.displayLinenrLocal = false;
     this.columnIdToColumnIndex = {};
     this.columnCount = 0;
-    this.lastDoubleClickedSpanId = null;
+    this.lastDoubleClickedElementId = null;
     this.currentSelectedElement = null;
+    this.currentSelectedColumn = null;
+    this.highlightedSpans = [];
+  }
+
+  getCurrentSelectedElement() {
+    return this.currentSelectedElement;
+  }
+
+  setCurrentSelectedElement(element) {
+    this.currentSelectedElement = element;
+  }
+
+  getCurrentSelectedWitness() {
+    return this.currentSelectedColumn;
+  }
+
+  setCurrentSelectedWitness(element) {
+    this.currentSelectedColumn = element;
   }
 
   getIndexByColumnId(columnId) {
@@ -96,99 +114,167 @@ class EditionManager {
     this.state = newState;
     this.witnessContainer.innerHTML = "";
     this.renderAllColumns();
-    if (this.state.lastDoubleClickedSpanId) {
-      this.handleDoubleClick("", this.state.lastDoubleClickedSpanId);
+    if (this.state.lastDoubleClickedElementId) {
+      this.handleDoubleClick("", this.state.lastDoubleClickedElementId);
     }
   }
 
-  initListeners() {
+  enterTargetsTextContent(event) {
+    return (
+      event.target.matches(`.${this.config.witness_line_class}`) &&
+      event.key === "Enter"
+    );
+  }
+
+  eventTargetsWitnessContent(event) {
+    return (
+      event.target.matches(`.${this.config.text_content_class}`) ||
+      event.target.matches(`.${this.config.text_content_class} > *`)
+    );
+  }
+
+  arrowDownAction(event) {
+    // Prevent default scrolling behavior
+    event.preventDefault();
+    if (!this.state.getCurrentSelectedElement()) {
+      // Focus the first child if no element is currently selected
+      const textContentParent = this.getTextContentParent(event);
+      const firstChild = textContentParent.firstElementChild;
+      if (firstChild) {
+        this.updateFocusState(firstChild, textContentParent, false);
+      }
+    } else {
+      const currentTextContent = this.getTextContentParent(event);
+      // check if the focussed column has changed
+      if (currentTextContent != this.state.getCurrentSelectedWitness()) {
+        // column was changed
+        // get the line id of the last selected line
+        const currentLineId = this.state
+          .getCurrentSelectedElement()
+          .getAttribute("id");
+        const currentLineInNewWitness = event.target.querySelector(
+          `#${currentLineId}`
+        );
+        this.handleDoubleClick(currentLineInNewWitness);
+      } else {
+        // Move focus to the next sibling
+        const nextElement =
+          this.state.getCurrentSelectedElement().nextElementSibling;
+        if (nextElement) {
+          this.updateFocusState(nextElement, null, false);
+        }
+      }
+    }
+  }
+
+  arrowUpAction(event) {
+    event.preventDefault(); // Prevent default scrolling behavior
+    const selectedTextContentParent = this.state.getCurrentSelectedWitness();
+    if (!selectedTextContentParent) {
+      console.log("no parent found!");
+      // Focus the first child if no element is currently selected
+      selectedTextContentParent = this.getTextContentParent(event);
+      const firstChild = selectedTextContentParent.firstElementChild;
+      if (firstChild) {
+        this.updateFocusState(firstChild, selectedTextContentParent, false);
+      }
+    } else {
+      // Move focus to the previous sibling
+      const prevElement =
+        this.state.getCurrentSelectedElement().previousElementSibling;
+      console.log(prevElement);
+      if (prevElement) {
+        prevElement.focus();
+        this.updateFocusState(prevElement, selectedTextContentParent, false);
+      }
+    }
+  }
+
+  arrowHorizontalAction(event) {
+    event.preventDefault();
+    // get current selectedWitness
+    const textContentColumn = event.target.closest(
+      `.${this.config.witness_class}`
+    );
+    const targetColumn =
+      event.key === "ArrowRight"
+        ? textContentColumn.nextElementSibling || null
+        : textContentColumn.previousElementSibling;
+    if (!targetColumn) {
+      return null;
+    }
+    const textContentParent = targetColumn.querySelector(
+      `.${this.config.text_content_class}`
+    );
+    const currentLineId = this.state.getCurrentSelectedElement()
+      ? this.state.getCurrentSelectedElement().getAttribute("id")
+      : textContentParent
+          .querySelector(`.${this.config.witness_line_class}`)
+          .getAttribute("id");
+    const currentLineInNewWitness =
+      textContentParent.querySelector(`#${currentLineId}`) ||
+      textContentParent.childNodes[0];
+    this.handleDoubleClick(currentLineInNewWitness);
+  }
+
+  initKeyDownListeners() {
+    this.witnessContainer.addEventListener("keydown", (event) => {
+      // Enter key triggers the synoptic scroll event
+      if (this.enterTargetsTextContent(event)) {
+        this.handleDoubleClick(event.target);
+      }
+      // Keydown targets contents of text column
+      else if (this.eventTargetsWitnessContent(event)) {
+        if (event.key === "ArrowDown") {
+          this.arrowDownAction(event);
+        } else if (event.key === "ArrowUp") {
+          this.arrowUpAction(event);
+        } else if (
+          (event.key === "ArrowRight" || event.key === "ArrowLeft") &&
+          event.target.matches(
+            `.${this.config.text_content_class}, .${this.config.text_content_class} > *`
+          )
+        ) {
+          this.arrowHorizontalAction(event);
+        }
+      }
+    });
+  }
+
+  initClickListeners() {
+    // doubleclick triggers scroll
+    this.witnessContainer.addEventListener("dblclick", (event) => {
+      const line = event.target.closest(`.${this.config.witness_line_class}`);
+      this.handleDoubleClick(line);
+    });
+    // click closes column
     this.witnessContainer.addEventListener("click", (event) => {
       if (event.target.matches(`.${this.config.remove_column_button_class}`)) {
         const columnId = event.target.closest(
           `.${this.config.witness_class}`
         ).id;
         this.removeColumn(columnId);
+      } else if (event.target.matches(`.${this.config.witness_line_class}`)) {
+        const line = event.target.closest(`.${this.config.witness_line_class}`);
+        const textContentParent = this.getTextContentParent(line);
+        this.updateFocusState(line, textContentParent);
       }
     });
-    // test
-    this.witnessContainer.addEventListener("keydown", (event) => {
-      if (
-        event.target.matches(`.${this.config.witness_line_class}`) &&
-        event.key === "Enter"
-      ) {
-        const spanId = event.target.getAttribute("id");
-        this.handleDoubleClick(event, spanId);
-      }
-    });
+  }
 
-    this.witnessContainer.addEventListener("keydown", (event) => {
-      if (
-        event.target.matches(`.${this.config.text_content_class}`) ||
-        event.target.matches(`.${this.config.text_content_class} > *`)
-      ) {
-        const textContentDiv = event.target.closest(
-          `.${this.config.text_content_class}`
-        );
-        console.log("Active element before:", document.activeElement);
-
-        if (event.key === "ArrowDown") {
-          event.preventDefault(); // Prevent default scrolling behavior
-          if (!this.state.currentSelectedElement) {
-            // Focus the first child if no element is currently selected
-            const firstChild = textContentDiv.firstElementChild;
-            if (firstChild) {
-              firstChild.focus();
-              this.state.currentSelectedElement = firstChild;
-            }
-          } else {
-            // Move focus to the next sibling
-            const nextElement =
-              this.state.currentSelectedElement.nextElementSibling;
-            if (nextElement) {
-              nextElement.focus();
-              this.state.currentSelectedElement = nextElement;
-            }
-          }
-        } else if (event.key === "ArrowUp") {
-          event.preventDefault(); // Prevent default scrolling behavior
-          if (!this.state.currentSelectedElement) {
-            // Focus the first child if no element is currently selected
-            const firstChild = textContentDiv.firstElementChild;
-            if (firstChild) {
-              firstChild.focus();
-              this.state.currentSelectedElement = firstChild;
-            }
-          } else {
-            // Move focus to the previous sibling
-            const prevElement =
-              this.state.currentSelectedElement.previousElementSibling;
-            if (prevElement) {
-              prevElement.focus();
-              this.state.currentSelectedElement = prevElement;
-            }
-          }
-        }
-
-        console.log("Active element after:", document.activeElement);
-      }
-    });
-
-    // test
+  initDropDownListener() {
     this.witnessContainer.addEventListener("change", (event) => {
       if (event.target.matches(`.${this.config.dropdown_class}`)) {
         const columnId = event.target.getAttribute("data-column-id");
         this.updateColumnWitness(columnId, event.target.value);
       }
     });
+  }
 
-    this.witnessContainer.addEventListener("dblclick", (event) => {
-      const line = event.target.closest(`.${this.config.witness_line_class}`);
-      if (line && this.witnessContainer.contains(line)) {
-        const spanId = line.getAttribute("id");
-        this.state.lastDoubleClickedSpanId = spanId;
-        this.handleDoubleClick(event, spanId);
-      }
-    });
+  initListeners() {
+    this.initDropDownListener();
+    this.initClickListeners();
+    this.initKeyDownListeners();
   }
 
   async getSnippet(witnessId) {
@@ -535,7 +621,71 @@ class EditionManager {
     return null;
   }
 
-  handleDoubleClick(event, spanId) {
+  getTextContentParent(elementOrEvent) {
+    if (elementOrEvent instanceof HTMLElement) {
+      return elementOrEvent.closest(`.${this.config.text_content_class}`);
+    } else if (elementOrEvent instanceof Event) {
+      return elementOrEvent.target.classList.contains(
+        this.config.text_content_class
+      )
+        ? elementOrEvent.target
+        : elementOrEvent.target.closest(
+            `div.${this.config.text_content_class}`
+          );
+    } else {
+      console.error(
+        `Provided input ${elementOrEvent} is neither a valid HTML element nor an event.`
+      );
+      return null;
+    }
+  }
+
+  updateFocusState(
+    selectedElement,
+    textContentParent,
+    fromDoubleClick = false
+  ) {
+    if (!selectedElement) {
+      return null;
+    }
+    selectedElement.focus();
+    if (!textContentParent) {
+      this.state.setCurrentSelectedWitness(
+        this.getTextContentParent(selectedElement)
+      );
+    } else {
+      this.state.setCurrentSelectedWitness(textContentParent);
+    }
+    this.state.setCurrentSelectedElement(selectedElement);
+    const elementId = selectedElement.getAttribute("id");
+    if (fromDoubleClick) {
+      this.state.lastDoubleClickedElementId = elementId;
+    }
+    console.log("update!");
+    return elementId;
+  }
+
+  removeHighlights(event, spanId) {
+    if (
+      !event.target.closest(
+        `.${this.config.text_content_class} span[id="${spanId}"]`
+      )
+    ) {
+      this.state.highlightedSpans.forEach((span) => {
+        span.classList.remove(this.config.highlight_class);
+        span.classList.remove(this.config.neigh_class);
+      });
+      this.witnessContainer.removeEventListener("click", this.removeHighlights);
+    }
+  }
+
+  handleDoubleClick(element) {
+    const textContentParent = this.getTextContentParent(element);
+    const spanId = this.updateFocusState(element, textContentParent, true);
+    console.assert(
+      spanId,
+      `Couldn't get id-Attribute from doubleclicked element ${element}. Better check your markup.`
+    );
     // Remove existing highlights
     this.witnessContainer
       .querySelectorAll(
@@ -552,7 +702,7 @@ class EditionManager {
     );
 
     // Highlight matching spans or their nearest visible siblings
-    const highlightedSpans = [];
+    this.state.highlightedSpans = [];
     matchingSpans.forEach((span) => {
       if (
         !span.matches(
@@ -562,7 +712,7 @@ class EditionManager {
         // Highlight the span if it's visible
         span.classList.add(this.config.highlight_class);
         span.scrollIntoView({ behavior: "smooth", block: "center" });
-        highlightedSpans.push(span);
+        this.state.highlightedSpans.push(span);
       } else {
         // Find the nearest visible sibling if the span is hidden
         const nearestVisibleSibling = this.findNearestVisibleSibling(span);
@@ -573,29 +723,17 @@ class EditionManager {
             behavior: "smooth",
             block: "center",
           });
-          highlightedSpans.push(nearestVisibleSibling);
+          this.state.highlightedSpans.push(nearestVisibleSibling);
         }
       }
     });
 
-    // Add a one-time click listener to remove highlights
-    const removeHighlights = (e) => {
-      if (
-        !e.target.closest(
-          `.${this.config.text_content_class} span[id="${spanId}"]`
-        )
-      ) {
-        highlightedSpans.forEach((span) => {
-          span.classList.remove(this.config.highlight_class);
-          span.classList.remove(this.config.neigh_class);
-        });
-        this.witnessContainer.removeEventListener("click", removeHighlights);
-      }
-    };
-
     // Attach the listener to the container instead of the document
-    this.witnessContainer.addEventListener("click", removeHighlights);
+    this.witnessContainer.addEventListener("click", (event, spanId) =>
+      this.removeHighlights(event, spanId)
+    );
   }
+
   async initColumns() {
     let columnIds = [];
     if (this.config.fetch_all_witnesses) {
