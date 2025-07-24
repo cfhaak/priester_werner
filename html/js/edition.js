@@ -89,6 +89,7 @@ class EditionManager {
     this.witnessContainer = document.getElementById(
       this.config.witnessContainerId
     );
+    this.columnElements = [];
     this.initListeners();
   }
   getOneIndexByColumnId(columnId) {
@@ -136,7 +137,7 @@ class EditionManager {
   arrowDownAction(event) {
     // Prevent default scrolling behavior
     event.preventDefault();
-    if (!this.state.getCurrentSelectedElement()) {
+    if (!this.getCurrentSelectedElement()) {
       // Focus the first child if no element is currently selected
       const textContentParent = this.getTextContentParent(event);
       const firstChild = textContentParent.firstElementChild;
@@ -146,7 +147,7 @@ class EditionManager {
     } else {
       const currentTextContent = this.getTextContentParent(event);
       // check if the focussed column has changed
-      if (currentTextContent != this.state.getCurrentSelectedWitness()) {
+      if (currentTextContent != this.getCurrentSelectedWitness()) {
         // column was changed
         // get the line id of the last selected line
         const currentLineId = this.state
@@ -159,7 +160,7 @@ class EditionManager {
       } else {
         // Move focus to the next sibling
         const nextElement =
-          this.state.getCurrentSelectedElement().nextElementSibling;
+          this.getCurrentSelectedElement().nextElementSibling;
         if (nextElement) {
           this.updateFocusState(nextElement, null, false);
         }
@@ -169,7 +170,7 @@ class EditionManager {
 
   arrowUpAction(event) {
     event.preventDefault(); // Prevent default scrolling behavior
-    const selectedTextContentParent = this.state.getCurrentSelectedWitness();
+    const selectedTextContentParent = this.getCurrentSelectedWitness();
     if (!selectedTextContentParent) {
       console.log("no parent found!");
       // Focus the first child if no element is currently selected
@@ -181,13 +182,69 @@ class EditionManager {
     } else {
       // Move focus to the previous sibling
       const prevElement =
-        this.state.getCurrentSelectedElement().previousElementSibling;
+        this.getCurrentSelectedElement().previousElementSibling;
       console.log(prevElement);
       if (prevElement) {
         prevElement.focus();
         this.updateFocusState(prevElement, selectedTextContentParent, false);
       }
     }
+  }
+
+  horizontalActionTrigger(event) {
+    return (
+      (event.key === "ArrowRight" || event.key === "ArrowLeft") &&
+      event.target.matches(
+        `.${this.config.text_content_class}, .${this.config.text_content_class} > *`
+      )
+    );
+  }
+
+  getDefaultElement() {
+    if (this.state.getCurrentSelectedWitness()) {
+      const element = this.state
+        .getCurrentSelectedWitness()
+        .querySelector(`.${this.config.witness_line_class}`);
+      this.state.setCurrentSelectedElement(element);
+      return element;
+    } else {
+      const element = this.getDefaultWitness().querySelector(
+        `.${this.config.witness_line_class}`
+      );
+      this.state.setCurrentSelectedElement(element);
+      return element;
+    }
+  }
+
+  getDefaultWitness() {
+    const witness = this.columnElements
+      ? this.columnElements[0].querySelector(
+          `.${this.config.text_content_class}`
+        )
+      : null;
+    if (witness) {
+      this.state.setCurrentSelectedWitness(witness);
+      return witness;
+    } else {
+      console.log("cant find content, reloading page");
+      window.location.reload();
+    }
+  }
+
+  getCurrentSelectedElement() {
+    const element =
+      this.state.getCurrentSelectedElement() ||
+      this.getDefaultElement() ||
+      null;
+    return element;
+  }
+
+  getCurrentSelectedWitness() {
+    const witness =
+      this.state.getCurrentSelectedWitness() ||
+      this.getDefaultWitness() ||
+      null;
+    return witness;
   }
 
   arrowHorizontalAction(event) {
@@ -206,8 +263,8 @@ class EditionManager {
     const textContentParent = targetColumn.querySelector(
       `.${this.config.text_content_class}`
     );
-    const currentLineId = this.state.getCurrentSelectedElement()
-      ? this.state.getCurrentSelectedElement().getAttribute("id")
+    const currentLineId = this.getCurrentSelectedElement()
+      ? this.getCurrentSelectedElement().getAttribute("id")
       : textContentParent
           .querySelector(`.${this.config.witness_line_class}`)
           .getAttribute("id");
@@ -215,6 +272,43 @@ class EditionManager {
       textContentParent.querySelector(`#${currentLineId}`) ||
       textContentParent.childNodes[0];
     this.handleDoubleClick(currentLineInNewWitness);
+  }
+
+  getNthtSibling(textContentParent, currentElement, n) {
+    const siblings = textContentParent.querySelector(
+      `.${this.config.witness_line_class}`
+    );
+    const sibling = siblings
+      ? siblings[
+          Math.min(
+            Array.prototype.indexOf.call(siblings, currentElement) + n,
+            siblings.length - 1
+          )
+        ]
+      : null;
+    return sibling;
+  }
+
+  scrollWitnessContainer(event) {
+    event.preventDefault();
+    const textContentParent = this.getTextContentParent(event);
+    const currentElement = this.getCurrentSelectedElement();
+    console.log(currentElement);
+    const siblingToFocus = this.getNthtSibling(
+      textContentParent,
+      currentElement,
+      20
+    );
+    console.log(siblingToFocus);
+    if (!siblingToFocus) {
+      return null;
+    }
+    siblingToFocus.scrollIntoView({
+      behavior: "smooth", // Optional: 'auto' (default) or 'smooth' for smooth scrolling
+      block: "center", // Optional: 'start', 'center', 'end', or 'nearest' (vertical alignment)
+      inline: "nearest", // Optional: 'start', 'center', 'end', or 'nearest' (horizontal alignment)
+    });
+    this.updateFocusState(siblingToFocus, textContentParent, false);
   }
 
   initKeyDownListeners() {
@@ -229,13 +323,10 @@ class EditionManager {
           this.arrowDownAction(event);
         } else if (event.key === "ArrowUp") {
           this.arrowUpAction(event);
-        } else if (
-          (event.key === "ArrowRight" || event.key === "ArrowLeft") &&
-          event.target.matches(
-            `.${this.config.text_content_class}, .${this.config.text_content_class} > *`
-          )
-        ) {
+        } else if (this.horizontalActionTrigger(event)) {
           this.arrowHorizontalAction(event);
+        } else if (event.key === "PageDown" || event.key === "PageUp") {
+          this.scrollWitnessContainer(event);
         }
       }
     });
@@ -272,6 +363,9 @@ class EditionManager {
   }
 
   initListeners() {
+    // document.addEventListener("keydown", (event) => {
+    //   console.log(event.key);
+    // })
     this.initDropDownListener();
     this.initClickListeners();
     this.initKeyDownListeners();
@@ -399,8 +493,10 @@ class EditionManager {
 
   addColumnContainer(witnessId) {
     const columnId = this.state.addColumn(witnessId);
-    const columnHTML = this.createColumnHTML(columnId, witnessId);
-    this.witnessContainer.appendChild(columnHTML);
+    const columnElement = this.createColumnHTML(columnId, witnessId);
+    this.witnessContainer.appendChild(columnElement);
+    this.columnElements.push(columnElement);
+    console.log(this.columnElements);
     return columnId;
   }
 
@@ -418,6 +514,8 @@ class EditionManager {
     const oldColumnId = this.getOneIndexByColumnId(columnId);
     this.state.removeColumn(columnId);
     const colElem = document.getElementById(columnId);
+    this.columnElements.pop(colElem);
+    console.log(this.columnElements);
     if (colElem) colElem.remove();
     this.sendAriaMessage(
       `Column ${oldColumnId} removed. ${this.state.columnCount} columns remaining.`
@@ -695,7 +793,9 @@ class EditionManager {
         span.classList.remove(this.config.highlight_class);
         span.classList.remove(this.config.neigh_class);
       });
-
+    if (!spanId) {
+      return null;
+    }
     // Find all matching spans with the same ID
     const matchingSpans = this.witnessContainer.querySelectorAll(
       `.${this.config.text_content_class} span[id="${spanId}"]`
