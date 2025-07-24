@@ -172,7 +172,6 @@ class EditionManager {
     event.preventDefault(); // Prevent default scrolling behavior
     const selectedTextContentParent = this.getCurrentSelectedWitness();
     if (!selectedTextContentParent) {
-      console.log("no parent found!");
       // Focus the first child if no element is currently selected
       selectedTextContentParent = this.getTextContentParent(event);
       const firstChild = selectedTextContentParent.firstElementChild;
@@ -275,16 +274,13 @@ class EditionManager {
   }
 
   getNthtSibling(textContentParent, currentElement, n) {
-    const siblings = textContentParent.querySelector(
+    const siblings = textContentParent.querySelectorAll(
       `.${this.config.witness_line_class}`
     );
+    const rawIndex = Array.prototype.indexOf.call(siblings, currentElement) + n;
+    const newIndex = Math.max(0, Math.min(rawIndex, siblings.length - 1));
     const sibling = siblings
-      ? siblings[
-          Math.min(
-            Array.prototype.indexOf.call(siblings, currentElement) + n,
-            siblings.length - 1
-          )
-        ]
+      ? siblings[newIndex]
       : null;
     return sibling;
   }
@@ -293,13 +289,11 @@ class EditionManager {
     event.preventDefault();
     const textContentParent = this.getTextContentParent(event);
     const currentElement = this.getCurrentSelectedElement();
-    console.log(currentElement);
     const siblingToFocus = this.getNthtSibling(
       textContentParent,
       currentElement,
-      20
+      (event.key === "PageDown") ? 20 : -20
     );
-    console.log(siblingToFocus);
     if (!siblingToFocus) {
       return null;
     }
@@ -363,9 +357,6 @@ class EditionManager {
   }
 
   initListeners() {
-    // document.addEventListener("keydown", (event) => {
-    //   console.log(event.key);
-    // })
     this.initDropDownListener();
     this.initClickListeners();
     this.initKeyDownListeners();
@@ -496,7 +487,6 @@ class EditionManager {
     const columnElement = this.createColumnHTML(columnId, witnessId);
     this.witnessContainer.appendChild(columnElement);
     this.columnElements.push(columnElement);
-    console.log(this.columnElements);
     return columnId;
   }
 
@@ -515,7 +505,6 @@ class EditionManager {
     this.state.removeColumn(columnId);
     const colElem = document.getElementById(columnId);
     this.columnElements.pop(colElem);
-    console.log(this.columnElements);
     if (colElem) colElem.remove();
     this.sendAriaMessage(
       `Column ${oldColumnId} removed. ${this.state.columnCount} columns remaining.`
@@ -759,7 +748,6 @@ class EditionManager {
     if (fromDoubleClick) {
       this.state.lastDoubleClickedElementId = elementId;
     }
-    console.log("update!");
     return elementId;
   }
 
