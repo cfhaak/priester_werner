@@ -14,6 +14,7 @@ class ColumnViewerConfig {
   emptyLineTogglerId = "empty-line-toggler";
   globalLinenrTogglerId = "global-linenr-toggler";
   localLinenrTogglerId = "local-linenr-toggler";
+  generateCitationUrlId = "generate-citation-url";
   defaultColumnNumber = 3;
   GLOBAL_SCROLL_CLASS = "global-scroll-vertical";
   INDIVIDUAL_SCROLL_CLASS = "individual-scroll-vertical";
@@ -35,6 +36,7 @@ class ColumnViewerConfig {
   label_empty_line_toggler = "Toggle Empty Lines";
   label_global_linenr_toggler = "Toggle Global Line Numbers";
   label_local_linenr_toggler = "Toggle Local Line Numbers";
+  label_generate_citation_link = "Generate Citation URL";
   class_of_controls_container_toggler = "witness_view_controls_toggle";
   class_of_controls_container = "witness_view_controls";
   label_remove_column = "Remove Column";

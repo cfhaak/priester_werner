@@ -92,6 +92,23 @@ class EditionManager {
     this.columnElements = [];
     this.initListeners();
   }
+
+  updateUrlWithState() {
+    const params = new URLSearchParams();
+    const loadedWitnessIds = this.state
+      .getAllColumns()
+      .map((col) => col.witnessId);
+    params.set("witnessIds", loadedWitnessIds.join(","));
+    const currentLineId = this.state.lastDoubleClickedElementId
+      ? this.state.lastDoubleClickedElementId
+      : this.getCurrentSelectedElement().getAttribute("id");
+    if (currentLineId) {
+      params.set("currentLine", currentSelectedElementId);
+    }
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", newUrl);
+  }
+
   getOneIndexByColumnId(columnId) {
     return this.state.getIndexByColumnId(columnId) + 1;
   }
@@ -137,7 +154,8 @@ class EditionManager {
   arrowDownAction(event) {
     // Prevent default scrolling behavior
     event.preventDefault();
-    if (!this.getCurrentSelectedElement()) {
+    let currentElement = this.getCurrentSelectedElement();
+    if (!currentElement) {
       // Focus the first child if no element is currently selected
       const textContentParent = this.getTextContentParent(event);
       const firstChild = textContentParent.firstElementChild;
@@ -153,14 +171,25 @@ class EditionManager {
         const currentLineId = this.state
           .getCurrentSelectedElement()
           .getAttribute("id");
-        const currentLineInNewWitness = event.target.querySelector(
+        let currentLineInNewWitness = event.target.querySelector(
           `#${currentLineId}`
         );
+        if (!this.elementIsVisible(currentLineInNewWitness)) {
+          currentLineInNewWitness = this.findNearestVisibleSibling(
+            currentLineInNewWitness,
+            true
+          );
+        }
         this.handleDoubleClick(currentLineInNewWitness);
       } else {
         // Move focus to the next sibling
-        const nextElement =
-          this.getCurrentSelectedElement().nextElementSibling;
+        let nextElement = this.getCurrentSelectedElement().nextElementSibling;
+        if (!nextElement) {
+          return null;
+        }
+        if (!this.elementIsVisible(nextElement)) {
+          nextElement = this.findNearestVisibleSibling(nextElement, true);
+        }
         if (nextElement) {
           this.updateFocusState(nextElement, null, false);
         }
@@ -170,24 +199,25 @@ class EditionManager {
 
   arrowUpAction(event) {
     event.preventDefault(); // Prevent default scrolling behavior
-    const selectedTextContentParent = this.getCurrentSelectedWitness();
+    let selectedTextContentParent = this.getCurrentSelectedWitness();
+    let newElement = null;
     if (!selectedTextContentParent) {
       // Focus the first child if no element is currently selected
       selectedTextContentParent = this.getTextContentParent(event);
-      const firstChild = selectedTextContentParent.firstElementChild;
-      if (firstChild) {
-        this.updateFocusState(firstChild, selectedTextContentParent, false);
-      }
+      newElement = selectedTextContentParent.querySelector(
+        `.${this.config.witness_line_class}`
+      );
     } else {
       // Move focus to the previous sibling
-      const prevElement =
-        this.getCurrentSelectedElement().previousElementSibling;
-      console.log(prevElement);
-      if (prevElement) {
-        prevElement.focus();
-        this.updateFocusState(prevElement, selectedTextContentParent, false);
+      newElement = this.getCurrentSelectedElement().previousElementSibling;
+      if (!newElement) {
+        return null;
       }
     }
+    if (!this.elementIsVisible(newElement)) {
+      newElement = this.findNearestVisibleSibling(newElement);
+    }
+    this.updateFocusState(newElement, selectedTextContentParent, false);
   }
 
   horizontalActionTrigger(event) {
@@ -267,9 +297,15 @@ class EditionManager {
       : textContentParent
           .querySelector(`.${this.config.witness_line_class}`)
           .getAttribute("id");
-    const currentLineInNewWitness =
+    let currentLineInNewWitness =
       textContentParent.querySelector(`#${currentLineId}`) ||
       textContentParent.childNodes[0];
+    if (!this.elementIsVisible(currentLineInNewWitness)) {
+      currentLineInNewWitness = this.findNearestVisibleSibling(
+        currentLineInNewWitness,
+        true
+      );
+    }
     this.handleDoubleClick(currentLineInNewWitness);
   }
 
@@ -279,9 +315,7 @@ class EditionManager {
     );
     const rawIndex = Array.prototype.indexOf.call(siblings, currentElement) + n;
     const newIndex = Math.max(0, Math.min(rawIndex, siblings.length - 1));
-    const sibling = siblings
-      ? siblings[newIndex]
-      : null;
+    const sibling = siblings ? siblings[newIndex] : null;
     return sibling;
   }
 
@@ -292,7 +326,7 @@ class EditionManager {
     const siblingToFocus = this.getNthtSibling(
       textContentParent,
       currentElement,
-      (event.key === "PageDown") ? 20 : -20
+      event.key === "PageDown" ? 20 : -20
     );
     if (!siblingToFocus) {
       return null;
@@ -677,35 +711,55 @@ class EditionManager {
     }
   }
 
-  findNearestVisibleSibling(element) {
-    // Start by looking for the previous visible sibling
+  elementIsVisible(element) {
+    console.log(element);
+    if (
+      !element.classList.contains(this.config.omitted_line_class) &&
+      !element.classList.contains(this.config.hidden_element_class) &&
+      element.hasAttribute("id")
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  findNearestVisiblePreviousSibling(element) {
     let sibling = element.previousElementSibling;
     while (sibling) {
-      if (
-        !sibling.matches(
-          `.${this.config.omitted_line_class}.${this.config.hidden_element_class}`
-        )
-      ) {
+      if (this.elementIsVisible(sibling)) {
         return sibling; // Return the first visible previous sibling
       }
       sibling = sibling.previousElementSibling;
     }
+    return null;
+  }
 
-    // If no previous visible sibling is found, look for the next visible sibling
-    sibling = element.nextElementSibling;
+  findNearestVisibleFollowingSibling(element) {
+    let sibling = element.nextElementSibling;
     while (sibling) {
-      if (
-        !sibling.matches(
-          `.${this.config.omitted_line_class}.${this.config.hidden_element_class}`
-        )
-      ) {
+      if (this.elementIsVisible(sibling)) {
         return sibling; // Return the first visible next sibling
       }
       sibling = sibling.nextElementSibling;
     }
-
-    // If no visible sibling is found in either direction, return null
     return null;
+  }
+
+  findNearestVisibleSibling(element, followingFirst = false) {
+    if (followingFirst) {
+      return (
+        this.findNearestVisibleFollowingSibling(element) ||
+        this.findNearestVisiblePreviousSibling(element) ||
+        element
+      );
+    } else {
+      return (
+        this.findNearestVisiblePreviousSibling(element) ||
+        this.findNearestVisibleFollowingSibling(element) ||
+        element
+      );
+    }
   }
 
   getTextContentParent(elementOrEvent) {
@@ -766,6 +820,7 @@ class EditionManager {
   }
 
   handleDoubleClick(element) {
+    console.log(element);
     const textContentParent = this.getTextContentParent(element);
     const spanId = this.updateFocusState(element, textContentParent, true);
     console.assert(
@@ -792,11 +847,7 @@ class EditionManager {
     // Highlight matching spans or their nearest visible siblings
     this.state.highlightedSpans = [];
     matchingSpans.forEach((span) => {
-      if (
-        !span.matches(
-          `.${this.config.omitted_line_class}.${this.config.hidden_element_class}`
-        )
-      ) {
+      if (this.elementIsVisible(span)) {
         // Highlight the span if it's visible
         span.classList.add(this.config.highlight_class);
         span.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -922,6 +973,12 @@ function createControls(config, manager) {
     config.label_local_linenr_toggler,
     () => manager.toggleLocalLinecounterVisibility(),
     "Toggle visibility of local line numbers"
+  );
+  addButton(
+    config.saveStateToUrlId,
+    config.generateCitationUrlId,
+    () => manager.updateUrlWithState(),
+    "Save the current state to the URL"
   );
 
   const toggle = document.querySelector(

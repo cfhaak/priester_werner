@@ -43,6 +43,7 @@
                             <div id="empty-line-toggler"></div>
                             <div id="global-linenr-toggler"></div>
                             <div id="local-linenr-toggler"></div>
+                            <div id="generate-citation-url"></div>
                         </div>
                     </div>
                     <div id="witness-container"></div>
